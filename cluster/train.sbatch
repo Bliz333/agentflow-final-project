@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -A info7375.202710 -p sharing,gpu --gres=gpu:h200:1 -t 01:00:00 -c 16 --mem=64G
+#SBATCH -A info5100.202610 -p sharing,gpu --gres=gpu:h200:1 -t 01:00:00 -c 16 --mem=32G
 #SBATCH -o /scratch/%u/info7375-w9/logs/%x-%j.out
 # One hour of a Flow-GRPO run:  sbatch -J <run> cluster/train.sbatch --lr 1e-4
 # train.py writes a checkpoint after every step and --resume continues from the last one. Each link
