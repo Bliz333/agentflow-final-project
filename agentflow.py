@@ -245,8 +245,9 @@ def parse_plan(text):
     if not matches:
         return "", "", None
     context, sub_goal, tool = (s.strip() for s in matches[-1])
-    key = tool.lower().replace(" ", "_")  # e.g. "Wikipedia Search Tool", "wikipedia_search"
-    return context, sub_goal, next((t for t in TOOLS if t.lower().removesuffix("_tool") in key), None)
+    key = tool.lower().replace(" ", "_")  # e.g. "Wikipedia Search Tool", "wikipedia_search", "Wikipedia"
+    return context, sub_goal, next((t for t in TOOLS if t.lower().removesuffix("_tool") in key
+                                    or key and t.lower().startswith(key)), None)
 
 
 def run_tools(llm, tokenizer, retriever, calls):

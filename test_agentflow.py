@@ -63,6 +63,7 @@ def test_parse_plan_matches_tool_names_loosely():
     assert agentflow.parse_plan(PLAN.format(topic="x", tool="Google_Search_Tool"))[2] is None
     assert agentflow.parse_plan(PLAN.format(topic="x", tool="wikipedia_search"))[2] == "Wikipedia_Search_Tool"
     assert agentflow.parse_plan(PLAN.format(topic="x", tool="Tool"))[2] is None
+    assert agentflow.parse_plan(PLAN.format(topic="x", tool="Wikipedia"))[2] == "Wikipedia_Search_Tool"
     assert agentflow.parse_plan("no structure at all") == ("", "", None)
 
 
