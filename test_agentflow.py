@@ -61,6 +61,8 @@ def test_parse_plan_matches_tool_names_loosely():
         ("The query asks about x.", "Find x.", "Wikipedia_Search_Tool")
     assert agentflow.parse_plan(PLAN.format(topic="x", tool="base generator tool"))[2] == "Base_Generator_Tool"
     assert agentflow.parse_plan(PLAN.format(topic="x", tool="Google_Search_Tool"))[2] is None
+    assert agentflow.parse_plan(PLAN.format(topic="x", tool="wikipedia_search"))[2] == "Wikipedia_Search_Tool"
+    assert agentflow.parse_plan(PLAN.format(topic="x", tool="Tool"))[2] is None
     assert agentflow.parse_plan("no structure at all") == ("", "", None)
 
 
@@ -99,6 +101,10 @@ def test_solve_runs_modules_in_order_and_stops():
                                                  ("verifier", 0.0), ("generator", 0.0)}
 
 
+def test_verifier_conclusion_ignores_case():
+    assert [v.upper() for v in agentflow.CONCLUSION.findall("Enough.\nConclusion: Stop")] == ["STOP"]
+
+
 def test_unknown_tool_and_bad_command_become_error_results():
     results = agentflow.run_tools(None, None, FakeRetriever(), [(None, "x"), ("Wikipedia_Search_Tool", "search it")])
     assert results[0].startswith("Error:") and results[1].startswith("Error:")
@@ -131,6 +137,8 @@ def test_exact_match_and_cover_match():
     assert agentflow.cover_match("Richard Nixon died on April 22, 1994.", ["April 22, 1994"]) == 1.0
     assert agentflow.cover_match("8 January 1891", ["January 8, 1891"]) == 0.0
     assert agentflow.cover_match("anything", ["", "the"]) == 0.0           # empty after normalisation
+    assert agentflow.cover_match("January 18, 1988", ["8"]) == 0.0         # whole words only
+    assert agentflow.cover_match("It is 8.", ["8", "eight"]) == 1.0
 
 
 def tiny_policy():
@@ -171,3 +179,4 @@ def test_checkpoints_keep_only_the_last(tmp_path):
     assert train.last_checkpoint(tmp_path) == tmp_path / "checkpoint_0002"
     assert not (tmp_path / "checkpoint_0001").exists()
     assert torch.load(tmp_path / "checkpoint_0002" / "state.pt")["step"] == 2
+    assert not (tmp_path / "checkpoint_0002" / "state.tmp").exists()

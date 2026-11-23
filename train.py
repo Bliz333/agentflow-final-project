@@ -16,6 +16,7 @@ A checkpoint (adapter + optimizer) is written after every step; --resume continu
 """
 import argparse
 import json
+import os
 import random
 import shutil
 import time
@@ -52,7 +53,9 @@ def last_checkpoint(out):
 def save_checkpoint(model, optimizer, out, step):
     path = out / f"checkpoint_{step:04d}"
     model.save_pretrained(path)
-    torch.save({"step": step, "optimizer": optimizer.state_dict()}, path / "state.pt")
+    # state.pt marks a complete checkpoint, so it appears only once fully written (a link can be killed).
+    torch.save({"step": step, "optimizer": optimizer.state_dict()}, path / "state.tmp")
+    os.replace(path / "state.tmp", path / "state.pt")
     for old in out.glob("checkpoint_*"):
         if old != path:
             shutil.rmtree(old)
@@ -157,7 +160,7 @@ def main():
             samples = [(*turn, a) for ep, a in zip(chosen, adv) if a != 0 for turn in ep.turns if turn[1]]
             stats.update(policy_loss(model, samples, max(n_tokens, 1), args))
             if mb == 0:  # before any update this step: only the vLLM / training numerical gap
-                first_gap = stats["logp_gap"] / max(stats["tokens"], 1)
+                first_gap = stats["logp_gap"] / stats["tokens"] if stats["tokens"] else None
             stats["grad_norm"] += torch.nn.utils.clip_grad_norm_(params, 1.0).item() / args.minibatches
             optimizer.step()
             optimizer.zero_grad(set_to_none=True)

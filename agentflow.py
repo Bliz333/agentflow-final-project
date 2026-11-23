@@ -213,7 +213,7 @@ Ground Truth: {truth}
 PLAN = re.compile(r"Context:\s*(.*?)\s*(?:\d\.\s*)?Sub-Goal:\s*(.*?)\s*(?:\d\.\s*)?Tool Name:\s*(.*?)\s*(?:```)?\s*(?=\n\n|\Z)",
                   re.DOTALL)
 COMMAND = re.compile(r"tool\.execute\(\s*query\s*=\s*(\"\"\"|'''|\"|')(.*?)\1\s*\)", re.DOTALL)
-CONCLUSION = re.compile(r"Conclusion\W*(STOP|CONTINUE)")
+CONCLUSION = re.compile(r"Conclusion\W*(STOP|CONTINUE)", re.IGNORECASE)
 ANSWER = re.compile(r"<answer>(.*?)</answer>", re.DOTALL)
 VERDICT = re.compile(r"true_false\W*(True|False)", re.IGNORECASE)
 
@@ -245,8 +245,8 @@ def parse_plan(text):
     if not matches:
         return "", "", None
     context, sub_goal, tool = (s.strip() for s in matches[-1])
-    key = tool.lower().replace(" ", "_")
-    return context, sub_goal, next((t for t in TOOLS if t.lower() in key or key in t.lower()), None) if key else None
+    key = tool.lower().replace(" ", "_")  # e.g. "Wikipedia Search Tool", "wikipedia_search"
+    return context, sub_goal, next((t for t in TOOLS if t.lower().removesuffix("_tool") in key), None)
 
 
 def run_tools(llm, tokenizer, retriever, calls):
@@ -306,7 +306,7 @@ def solve(llm, tokenizer, retriever, questions, max_steps, temperature, lora_req
                                                  **fill)) for ep in active]
         for ep, out in zip(active, generate(llm, prompts, 1024, module_temperature)):
             verdicts = CONCLUSION.findall(out.outputs[0].text)
-            ep.done = bool(verdicts) and verdicts[-1] == "STOP"
+            ep.done = bool(verdicts) and verdicts[-1].upper() == "STOP"
     prompts = [chat(tokenizer, SOLUTION.format(question=ep.question, analysis=ep.analysis, memory=ep.memory))
                for ep in episodes]
     for ep, out in zip(episodes, generate(llm, prompts, 1024, module_temperature)):
@@ -357,6 +357,7 @@ def exact_match(prediction, golden_answers):
 
 
 def cover_match(prediction, golden_answers):
-    """FlashRAG's accuracy: a golden answer appears in the normalised prediction (the training reward)."""
-    prediction = normalize_answer(prediction)
-    return float(any(normalize_answer(g) and normalize_answer(g) in prediction for g in golden_answers))
+    """FlashRAG's accuracy, on whole words: a golden answer appears in the normalised prediction (the
+    training reward). Whole words, so that a golden "8" is not found in "1988"."""
+    prediction = f" {normalize_answer(prediction)} "
+    return float(any(normalize_answer(g) and f" {normalize_answer(g)} " in prediction for g in golden_answers))

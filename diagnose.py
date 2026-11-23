@@ -15,21 +15,6 @@ import agentflow
 import train
 
 
-class ModuleTemperatures:
-    """The vLLM engine with the temperature chosen per module; greedy calls (the generator tool) stay greedy."""
-
-    def __init__(self, llm, planner, others):
-        self.llm, self.planner, self.others = llm, planner, others
-
-    def generate(self, prompts, params, lora_request=None, use_tqdm=False):
-        from vllm import SamplingParams
-        t = params.temperature
-        if t > 0:
-            t = self.planner if "Determine the optimal next step" in prompts[0] else self.others
-        params = SamplingParams(temperature=t, max_tokens=params.max_tokens, logprobs=params.logprobs)
-        return self.llm.generate(prompts, params, lora_request=lora_request, use_tqdm=False)
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--adapter", required=True)
@@ -54,8 +39,7 @@ def main():
     out = {}
     for name, planner, others, lora in [("A", .7, .7, None), ("B", .7, 0, None), ("C", 0, .7, None),
                                         ("D", .7, .7, adapter)]:
-        episodes = agentflow.solve(ModuleTemperatures(llm, planner, others), tokenizer, retriever, prompts, 3, 0.7,
-                                   lora)
+        episodes = agentflow.solve(llm, tokenizer, retriever, prompts, 3, planner, lora, module_temperature=others)
         rewards = [agentflow.cover_match(agentflow.final_answer(ep.output), g) for ep, g in zip(episodes, golden)]
         groups = [rewards[i:i + 8] for i in range(0, len(rewards), 8)]
         firsts = [[ep.memory.get("Action Step 1", {}) for ep in episodes[i:i + 8]] for i in range(0, len(episodes), 8)]

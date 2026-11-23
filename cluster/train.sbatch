@@ -13,9 +13,16 @@ source /scratch/$USER/info7375-w9/code/cluster/env.sh
 if squeue -h -u $USER -n "$SLURM_JOB_NAME" -t RUNNING -o %i | grep -vx "$SLURM_JOB_ID" | grep -q .; then
   echo "another link of $SLURM_JOB_NAME is running"; exit 0
 fi
-NEXT=$(sbatch --parsable --dependency=afterany:$SLURM_JOB_ID -J "$SLURM_JOB_NAME" cluster/train.sbatch "$@")
+# Queue the next link in the background, retrying while the QoS limit on queued jobs is reached.
+NEXT_FILE=$W/runs/$SLURM_JOB_NAME.next
+rm -f $NEXT_FILE
+(until sbatch --parsable --dependency=afterany:$SLURM_JOB_ID -J "$SLURM_JOB_NAME" cluster/train.sbatch "$@" \
+   > $NEXT_FILE; do echo "$(date) could not queue the next link, retrying in 5 minutes"; sleep 300; done) &
+QUEUER=$!
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 python train.py --out $W/runs/$SLURM_JOB_NAME --resume "$@"
 STATUS=$?
+kill $QUEUER 2>/dev/null
+NEXT=$(cat $NEXT_FILE 2>/dev/null)
 echo "$(date) train.py exited with $STATUS; cancelling the next link $NEXT"
-scancel $NEXT
+[ -n "$NEXT" ] && scancel $NEXT

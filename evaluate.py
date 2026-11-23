@@ -2,8 +2,8 @@
 
   direct     the base model answers alone, greedy, with Search-R1's Direct Inference prompt (the paper's
              Qwen-2.5-7B-Instruct row, 12.0, is Search-R1's number for this setting)
-  agentflow  AgentFlow, untrained or with a Flow-GRPO adapter: at most 10 turns, planner temperature 0.7,
-             3 trials (paper, appendix C.2)
+  agentflow  AgentFlow, untrained or with a Flow-GRPO adapter: at most 10 turns, every module at temperature
+             0.7 (the paper's planner temperature; the official code uses one temperature), 3 trials
 
 Accuracy is the judge's verdict (agentflow.judge); exact match of the <answer> is reported next to it.
     python evaluate.py --mode direct --out results/direct.json
@@ -14,6 +14,7 @@ import argparse
 import csv
 import io
 import json
+import os
 import statistics
 import urllib.request
 from pathlib import Path
@@ -62,6 +63,7 @@ def main():
     parser.add_argument("--model", default=MODEL_ID, help="a smaller model for local smoke tests")
     parser.add_argument("--vllm-mem", type=float, help="vLLM's share of the GPU (default 0.85 direct, 0.45 agentflow)")
     args = parser.parse_args()
+    os.environ["OPENCODE_GO_API_KEY"]  # the judge's key: fail now, not after the GPU rollouts
 
     from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams

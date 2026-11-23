@@ -51,7 +51,7 @@ standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact matc
 | `flow_grpo_greedy_q96` | frozen modules greedy, 96 questions per step | in progress |
 
 **Why the planner does not learn here** (`diagnose.py`, `results/diagnose.json`: 64 unseen training
-questions × 8 rollouts, at most 3 turns):
+questions × 8 rollouts, at most 3 turns; run while the reward still matched substrings, not whole words):
 
 | | reward | groups with equal rewards | best of 8 |
 |---|---|---|---|
@@ -90,7 +90,7 @@ training and 10 in evaluation, the official judge prompt, 3 evaluation trials.
   training fast and repeatable. This is the main reason the absolute numbers are lower than the paper's.
 - **Judge**: evaluation uses the official judge prompt with DeepSeek V4.1 Flash instead of GPT-4o;
   exact match is reported next to it. The **training reward** is not an LLM judge but FlashRAG's
-  accuracy rule (a golden answer appears in the final answer): the DeepSeek API answers only about 40
+  accuracy rule on whole words (a golden answer appears in the final answer): the DeepSeek API answers only about 40
   requests a minute, which made judging 75 % of a training step, and the local Qwen2.5-7B-Instruct as
   judge rejected 39 % of the answers DeepSeek accepts. On 500 Bamboogle answers the rule agrees with
   DeepSeek 92 % of the time (Qwen as judge: 86 %, exact match: 80 %).
