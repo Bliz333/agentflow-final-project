@@ -93,6 +93,10 @@ def test_solve_runs_modules_in_order_and_stops():
         ("planner", True, 0.7), ("analysis", False, 0.7), ("executor", False, 0.7), ("verifier", False, 0.7),
         ("generator", False, 0.7), ("base_generator", False, 0.0)}
     assert sum(m == "verifier" for m, _, _ in llm.calls) == 2 + 1  # step 1: A and B, step 2: B
+    llm.calls.clear()
+    agentflow.solve(llm, tokenizer, FakeRetriever(), ["Question A"], 3, 0.7, lora, module_temperature=0.0)
+    assert {(m, t) for m, _, t in llm.calls} == {("planner", 0.7), ("analysis", 0.0), ("executor", 0.0),
+                                                 ("verifier", 0.0), ("generator", 0.0)}
 
 
 def test_unknown_tool_and_bad_command_become_error_results():

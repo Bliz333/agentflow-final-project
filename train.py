@@ -91,6 +91,9 @@ def main():
     parser.add_argument("--clip-high", type=float, default=0.3)
     parser.add_argument("--max-steps", type=int, default=3, help="AgentFlow turns per rollout in training")
     parser.add_argument("--temperature", type=float, default=0.7, help="planner sampling temperature")
+    parser.add_argument("--module-temperature", type=float,
+                        help="temperature of the frozen modules (default: the planner's, as the official code); 0 "
+                             "makes the reward differences within a group come from the planner alone")
     parser.add_argument("--keep-every", type=int, default=10, help="steps between adapters kept for evaluation")
     parser.add_argument("--vllm-mem", type=float, default=0.4)
     parser.add_argument("--model", default=MODEL_ID)
@@ -133,7 +136,8 @@ def main():
         batch = [questions[(step * args.questions + i) % len(questions)] for i in range(args.questions)]
         prompts = [f"{q.strip()} {agentflow.ANSWER_FORMAT}" for q, _ in batch for _ in range(args.group)]
         episodes = agentflow.solve(llm, tokenizer, retriever, prompts, args.max_steps, args.temperature,
-                                   LoRARequest(f"step_{step}", step + 1, str(live)))
+                                   LoRARequest(f"step_{step}", step + 1, str(live)),
+                                   module_temperature=args.module_temperature)
         t1 = time.time()
         rewards = [agentflow.cover_match(agentflow.final_answer(ep.output), g)
                    for ep, (_, g) in zip(episodes, [b for b in batch for _ in range(args.group)])]

@@ -268,12 +268,16 @@ def run_tools(llm, tokenizer, retriever, calls):
     return results
 
 
-def solve(llm, tokenizer, retriever, questions, max_steps, temperature, lora_request=None, planner_tokens=2048):
-    """Run AgentFlow on questions (strings, ANSWER_FORMAT already appended); one Episode per question."""
+def solve(llm, tokenizer, retriever, questions, max_steps, temperature, lora_request=None, planner_tokens=2048,
+          module_temperature=None):
+    """Run AgentFlow on questions (strings, ANSWER_FORMAT already appended); one Episode per question.
+
+    `temperature` is the planner's; the other modules use `module_temperature` (default: the same)."""
+    module_temperature = temperature if module_temperature is None else module_temperature
     fill = dict(tools=TOOLS, toolbox=TOOLBOX)
     episodes = [Episode(q) for q in questions]
     for ep, out in zip(episodes, generate(llm, [chat(tokenizer, QUERY_ANALYSIS.format(question=q, **fill))
-                                               for q in questions], 1024, temperature)):
+                                               for q in questions], 1024, module_temperature)):
         ep.analysis = out.outputs[0].text
     for step in range(1, max_steps + 1):
         active = [ep for ep in episodes if not ep.done]
@@ -291,7 +295,7 @@ def solve(llm, tokenizer, retriever, questions, max_steps, temperature, lora_req
                                                        tool_metadata=TOOLBOX.get(tool), context=context))
                    for ep, (context, sub_goal, tool) in zip(active, plans)]
         commands = [o.outputs[0].text.split("Generated Command:")[-1].strip()
-                    for o in generate(llm, prompts, 512, temperature)]
+                    for o in generate(llm, prompts, 512, module_temperature)]
         results = run_tools(llm, tokenizer, retriever, [(tool, c) for (_, _, tool), c in zip(plans, commands)])
         for ep, (_, sub_goal, tool), command, result in zip(active, plans, commands, results):
             ep.memory[f"Action Step {step}"] = {"tool_name": tool, "sub_goal": sub_goal, "command": command,
@@ -300,12 +304,12 @@ def solve(llm, tokenizer, retriever, questions, max_steps, temperature, lora_req
             break
         prompts = [chat(tokenizer, VERIFY.format(question=ep.question, analysis=ep.analysis, memory=ep.memory,
                                                  **fill)) for ep in active]
-        for ep, out in zip(active, generate(llm, prompts, 1024, temperature)):
+        for ep, out in zip(active, generate(llm, prompts, 1024, module_temperature)):
             verdicts = CONCLUSION.findall(out.outputs[0].text)
             ep.done = bool(verdicts) and verdicts[-1] == "STOP"
     prompts = [chat(tokenizer, SOLUTION.format(question=ep.question, analysis=ep.analysis, memory=ep.memory))
                for ep in episodes]
-    for ep, out in zip(episodes, generate(llm, prompts, 1024, temperature)):
+    for ep, out in zip(episodes, generate(llm, prompts, 1024, module_temperature)):
         ep.output = out.outputs[0].text
     return episodes
 
