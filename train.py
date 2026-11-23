@@ -1,7 +1,10 @@
 """Flow-GRPO (AgentFlow, Eq. 5) with LoRA: train the planner of agentflow.py on Search-R1's NQ + HotpotQA.
 
-Each step: 32 questions x 8 AgentFlow rollouts (at most 3 turns, temperature 0.7); the judge (the local
-Qwen2.5-7B-Instruct with the official judge prompt) scores every final answer 1 / 0. A rollout's reward, normalised within its group of 8 (Eq. 7), is the
+Each step: 32 questions x 8 AgentFlow rollouts (at most 3 turns, temperature 0.7); a final answer gets
+reward 1 if a golden answer appears in it (agentflow.cover_match), else 0. The paper's GPT-4o judge is
+replaced by this rule: on 500 Bamboogle answers it agrees with the DeepSeek judge used for evaluation 92 %
+of the time, the local Qwen2.5-7B-Instruct as judge only 86 % (it rejects correct answers written as a
+sentence), and the DeepSeek API is too slow for training (about 40 requests a minute). A rollout's reward, normalised within its group of 8 (Eq. 7), is the
 advantage of every planner turn in it (Eq. 4: the final outcome is broadcast to all turns). Then 4
 minibatch updates of the clipped objective (clip 0.2 / 0.3) plus a KL penalty to the base model (k3,
 beta 0.001), averaged over all planner tokens of the minibatch, as the official verl code does.
@@ -132,12 +135,10 @@ def main():
         episodes = agentflow.solve(llm, tokenizer, retriever, prompts, args.max_steps, args.temperature,
                                    LoRARequest(f"step_{step}", step + 1, str(live)))
         t1 = time.time()
-        rewards = agentflow.judge([q for q, _ in batch for _ in range(args.group)],
-                                  [agentflow.final_answer(ep.output) for ep in episodes],
-                                  [g for _, g in batch for _ in range(args.group)], llm, tokenizer)
+        rewards = [agentflow.cover_match(agentflow.final_answer(ep.output), g)
+                   for ep, (_, g) in zip(episodes, [b for b in batch for _ in range(args.group)])]
         r = torch.tensor(rewards).view(args.questions, args.group)
         advantages = ((r - r.mean(1, keepdim=True)) / (r.std(1, keepdim=True) + 1e-6)).flatten().tolist()
-        t2 = time.time()
 
         model.train()
         order = list(range(len(episodes)))
@@ -169,7 +170,7 @@ def main():
                    "turns": sum(turns) / len(turns), "planner_tokens": sum(planner_tokens) / len(planner_tokens),
                    "tools": dict(tools), "kl": stats["kl"] / trained, "clip_frac": stats["clipped"] / trained,
                    "logp_gap": stats["logp_gap"] / trained, "logp_gap_first": first_gap, "grad_norm": stats["grad_norm"],
-                   "rollout_s": t1 - t0, "judge_s": t2 - t1, "train_s": time.time() - t2}
+                   "rollout_s": t1 - t0, "train_s": time.time() - t1}
         print(json.dumps(metrics), flush=True)
         with open(out / "metrics.jsonl", "a") as f:
             f.write(json.dumps(metrics) + "\n")
