@@ -50,6 +50,10 @@ standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact matc
 | `flow_grpo_lr1e-4_greedy` | frozen modules greedy (`--module-temperature 0`) | 75 |
 | `flow_grpo_greedy_q96` | frozen modules greedy, 96 questions per step | in progress |
 
+The first three runs used the reward rule on substrings; `train.py` now matches whole words (a
+golden "8" no longer matches "1988"), which changes the reward only for the 3.4 % of training
+questions with a golden answer of at most two characters.
+
 **Why the planner does not learn here** (`diagnose.py`, `results/diagnose.json`: 64 unseen training
 questions × 8 rollouts, at most 3 turns; run while the reward still matched substrings, not whole words):
 
