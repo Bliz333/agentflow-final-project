@@ -1,7 +1,7 @@
 {
  "summary": {
   "mode": "agentflow",
-  "adapter": "/scratch/mi.sh/info7375-w9/runs/flow_grpo_lr1e-4/adapters/step_0030",
+  "adapter": "runs/flow_grpo_lr1e-4/adapters/step_0030",
   "n": 125,
   "accuracy": 0.4613333333333333,
   "accuracy_std": 0.009977753031397167,
