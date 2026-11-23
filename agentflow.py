@@ -313,12 +313,14 @@ def final_answer(output):
     return matches[-1].strip() if matches else output.strip()
 
 
-def judge(questions, responses, golden_answers, workers=256):
-    """1.0 / 0.0 per response: the official LLM-as-judge prompt, temperature 0, all requests at once.
+def judge(questions, responses, golden_answers, workers=8):
+    """1.0 / 0.0 per response: the official LLM-as-judge prompt, temperature 0, without thinking.
 
-    An exact match is correct without asking the judge (it saves about a third of the calls)."""
+    An exact match is correct without asking the judge (it saves about a third of the calls). The API
+    allows 20 requests in flight per account, shared by all running jobs; a refused request (429) is
+    retried with backoff."""
     from openai import OpenAI
-    client = OpenAI(base_url=JUDGE_URL, api_key=os.environ["OPENCODE_GO_API_KEY"], timeout=120, max_retries=10,
+    client = OpenAI(base_url=JUDGE_URL, api_key=os.environ["OPENCODE_GO_API_KEY"], timeout=120, max_retries=100,
                     default_headers={"x-opencode-session": f"info7375-w9-{os.getpid()}"})
 
     def one(item):
@@ -327,7 +329,8 @@ def judge(questions, responses, golden_answers, workers=256):
             return 1.0
         prompt = JUDGE.format(question=question, response=response, truth=truth)
         reply = client.chat.completions.create(model=JUDGE_MODEL, temperature=0,
-                                               messages=[{"role": "user", "content": prompt}])
+                                               messages=[{"role": "user", "content": prompt}],
+                                               extra_body={"thinking": {"type": "disabled"}})
         verdict = VERDICT.findall(reply.choices[0].message.content or "")
         return float(bool(verdict) and verdict[-1].lower() == "true")
 
