@@ -26,6 +26,7 @@ standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact matc
 | AgentFlow, untrained | 58.4 | **43.7 ± 2.0** [EM 14.7] |
 | (AgentFlow, untrained, only the planner sampling) | | 45.3 ± 2.0 [EM 20.8] |
 | AgentFlow w/ Flow-GRPO (LoRA), step 30 / 60 / 90 | 69.6 | 46.1 ± 1.0 / **46.9 ± 1.4** / 44.3 ± 1.6 [EM 14.9 / 17.9 / 15.5] |
+| (Flow-GRPO with the frozen modules greedy in training, step 60) | | 44.5 ± 3.1 [EM 16.8] |
 
 - **Qwen-2.5-7B-Instruct**: the paper's 12.0 is Search-R1's exact-match number for this prompt; our
   exact match is 10.4 (13 of 125 against 15). The judge also accepts answers like "1837" for
@@ -39,7 +40,15 @@ standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact matc
   includes 0 (step 60: −2.1 to +8.8). The training reward stayed flat (about 0.59) while the planner
   moved away from the base model (KL to the base 0.45 per token at step 100), and runs with learning
   rates 1e-4 and 3e-5, which see the same questions at every step, got the same rewards (mean paired
-  difference −0.004 over 37 steps).
+  difference −0.004 over 37 steps). Training with the frozen modules greedy, so that the reward
+  differences within a group come from the planner alone (below), did not help either: +0.8 at step 60.
+
+| Run (`results/metrics/`) | Setting | Steps |
+|---|---|---|
+| `flow_grpo_lr1e-4` | the reported run: every module at 0.7, learning rate 1e-4 | 101 |
+| `flow_grpo_lr3e-5` | learning rate 3e-5, stopped when its rewards matched the 1e-4 run | 37 |
+| `flow_grpo_lr1e-4_greedy` | frozen modules greedy (`--module-temperature 0`) | 75 |
+| `flow_grpo_greedy_q96` | frozen modules greedy, 96 questions per step | in progress |
 
 **Why the planner does not learn here** (`diagnose.py`, `results/diagnose.json`: 64 unseen training
 questions × 8 rollouts, at most 3 turns):
@@ -88,8 +97,7 @@ training and 10 in evaluation, the official judge prompt, 3 evaluation trials.
 - **Training data**: Search-R1's NQ + HotpotQA questions only (the paper mixes in DeepMath, which a
   search benchmark does not need).
 - Every module samples at temperature 0.7 in training and evaluation, as the official training code
-  does (it passes one temperature to all modules); the paper only gives the planner's. With the
-  frozen modules greedy, 78 % of the groups of 8 rollouts had identical rewards and no gradient.
+  does (it passes one temperature to all modules); the paper only gives the planner's.
 
 ## 3. How to run
 
@@ -103,6 +111,7 @@ python -m pytest -q test_agentflow.py                     # no GPU needed
 sbatch -J eval cluster/eval.sbatch --mode direct --out $W/results/direct.json
 sbatch -J eval cluster/eval.sbatch --mode agentflow --out $W/results/agentflow.json
 sbatch -J flow_grpo cluster/train.sbatch --steps 200 --lr 1e-4   # a chain of 1-hour links
+sbatch -J flow_grpo_greedy cluster/train.sbatch --steps 200 --lr 1e-4 --module-temperature 0
 sbatch -J eval cluster/eval.sbatch --mode agentflow --adapter $W/runs/flow_grpo/adapters/step_XXXX \
   --out $W/results/flow_grpo.json
 python diagnose.py --adapter $W/runs/flow_grpo/adapters/step_0030 --out $W/results/diagnose.json   # one GPU
