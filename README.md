@@ -10,12 +10,56 @@ and *AgentFlow w/ Flow-GRPO*, training the planner with **LoRA** instead of full
 | [`train.py`](train.py) | Flow-GRPO: 32 questions × 8 rollouts per step, outcome reward broadcast to every planner turn, group-normalised advantage, clipped objective + KL, LoRA |
 | [`evaluate.py`](evaluate.py) | Bamboogle: `direct` (the base model alone) and `agentflow` (untrained or with an adapter, 3 trials) |
 | [`retriever.py`](retriever.py) | Search-R1's E5 search over the 2018 Wikipedia dump, unchanged from week 8 |
+| [`diagnose.py`](diagnose.py) | Where the reward differences within a group come from (section 1) |
+| [`results/`](results/) | Evaluation results (without the per-question memory, 5 MB each) and training metrics per step |
 | [`test_agentflow.py`](test_agentflow.py) | Tests without a GPU model: the loop with a scripted LLM, parsers, judge, the Flow-GRPO update on a tiny random model, checkpoints |
 | [`cluster/`](cluster/) | Slurm scripts for the NEU Explorer cluster (1-hour links that resume from the last step) |
 
 ## 1. Results
 
-RESULTS_PLACEHOLDER
+Bamboogle, 125 questions. **Accuracy** is the official judge prompt run by DeepSeek V4.1 Flash, mean ±
+standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact match (EM) in brackets.
+
+| | paper | this replication |
+|---|---|---|
+| Qwen-2.5-7B-Instruct (no tools) | 12.0 | 18.4 [EM 10.4] |
+| AgentFlow, untrained | 58.4 | **43.7 ± 2.0** [EM 14.7] |
+| (AgentFlow, untrained, only the planner sampling) | | 45.3 ± 2.0 [EM 20.8] |
+| AgentFlow w/ Flow-GRPO (LoRA), step 30 / 60 / 90 | 69.6 | 46.1 ± 1.0 / **46.9 ± 1.4** / 44.3 ± 1.6 [EM 14.9 / 17.9 / 15.5] |
+
+- **Qwen-2.5-7B-Instruct**: the paper's 12.0 is Search-R1's exact-match number for this prompt; our
+  exact match is 10.4 (13 of 125 against 15). The judge also accepts answers like "1837" for
+  "20 June 1837", hence 18.4.
+- **AgentFlow** is 15 points below the paper because its search tool is not the paper's: the official
+  Bamboogle setup's "Google Search" is Gemini 2.5 Flash answering with Google grounding, ours is
+  Search-R1's top-3 passages from the 2018 Wikipedia dump. Our teammates' independent TRL
+  implementation with the same retriever gets 41–43 % (judged by Qwen2.5-7B-Instruct).
+- **Flow-GRPO** did not measurably improve AgentFlow within 100 steps. Paired by question against the
+  untrained system, steps 30 / 60 / 90 are +2.4 / +3.2 / +0.5 points, every 95 % bootstrap interval
+  includes 0 (step 60: −2.1 to +8.8). The training reward stayed flat (about 0.59) while the planner
+  moved away from the base model (KL to the base 0.45 per token at step 100), and runs with learning
+  rates 1e-4 and 3e-5, which see the same questions at every step, got the same rewards (mean paired
+  difference −0.004 over 37 steps).
+
+**Why the planner does not learn here** (`diagnose.py`, `results/diagnose.json`: 64 unseen training
+questions × 8 rollouts, at most 3 turns):
+
+| | reward | groups with equal rewards | best of 8 |
+|---|---|---|---|
+| A every module samples at 0.7 (training default) | 0.578 | 53 % | 0.766 |
+| B only the planner samples | 0.594 | 64 % | 0.734 |
+| C the planner is greedy, the other modules sample | 0.574 | 53 % | 0.797 |
+| D as A, planner after 30 steps at 1e-4 | 0.576 | 64 % | 0.734 |
+
+- GRPO learns only from groups whose 8 rollouts get different rewards. With the planner greedy (C)
+  as many groups differ as with everything sampled (A), more than with only the planner sampling (B):
+  a large part of the reward differences the planner is credited with comes from the frozen executor,
+  verifier and generator, which it cannot learn from.
+- The trained planner changed its behaviour (5.1 instead of 3.6 distinct first tool calls per group)
+  but not the reward on these questions (D − A = −0.002 ± 0.020 per question).
+- The room is small: best of 8 is 0.77 against a mean of 0.58, and the planner picks the Wikipedia
+  search for 98 % of its tool calls. Choosing a tool, which in the paper's setup decides between
+  Wikipedia and the Gemini-backed Google Search, leaves it little to improve here.
 
 ## 2. Setup
 
@@ -23,9 +67,8 @@ RESULTS_PLACEHOLDER
 four modules on Qwen2.5-7B-Instruct with the official prompts (text-only branch, "direct" final
 output), only the planner's next-step calls are trained, the others are frozen; Flow-GRPO with 32
 questions × 8 rollouts per step, 4 updates per step, clip 0.2 / 0.3, KL 0.001 to the base model,
-token-mean loss over the minibatch, planner temperature 0.7, at most 2048 planner tokens, at most 3
-turns in training and 10 in evaluation, LLM-as-judge reward (1 / 0) with the official judge prompt,
-3 evaluation trials.
+token-mean loss over the minibatch, temperature 0.7, at most 2048 planner tokens, at most 3 turns in
+training and 10 in evaluation, the official judge prompt, 3 evaluation trials.
 
 **Different**, and why:
 
@@ -62,4 +105,5 @@ sbatch -J eval cluster/eval.sbatch --mode agentflow --out $W/results/agentflow.j
 sbatch -J flow_grpo cluster/train.sbatch --steps 200 --lr 1e-4   # a chain of 1-hour links
 sbatch -J eval cluster/eval.sbatch --mode agentflow --adapter $W/runs/flow_grpo/adapters/step_XXXX \
   --out $W/results/flow_grpo.json
+python diagnose.py --adapter $W/runs/flow_grpo/adapters/step_0030 --out $W/results/diagnose.json   # one GPU
 ```
