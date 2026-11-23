@@ -40,7 +40,9 @@ turns in training and 10 in evaluation, LLM-as-judge reward (1 / 0) with the off
   evaluation. Exact match is reported next to it.
 - **Training data**: Search-R1's NQ + HotpotQA questions only (the paper mixes in DeepMath, which a
   search benchmark does not need).
-- The frozen modules run at temperature 0, so the 8 rollouts of a question differ only by the planner.
+- Every module samples at temperature 0.7 in training and evaluation, as the official training code
+  does (it passes one temperature to all modules); the paper only gives the planner's. With the
+  frozen modules greedy, 78 % of the groups of 8 rollouts had identical rewards and no gradient.
 
 ## 3. How to run
 

@@ -87,9 +87,11 @@ def test_solve_runs_modules_in_order_and_stops():
     assert len(a.turns) == 1 and len(b.turns) == 3            # one trained planner sample per turn
     assert b.turns[0] == ([7, 8], [1, 2, 3], [-0.5, -0.5, -0.5])
     assert agentflow.final_answer(a.output) == "1812"
-    # Only the planner uses the LoRA and samples; no verifier call after the last turn.
-    assert {(lora_used, t) for m, lora_used, t in llm.calls if m == "planner"} == {(True, 0.7)}
-    assert all(not lora_used and t == 0.0 for m, lora_used, t in llm.calls if m != "planner")
+    # Only the planner uses the LoRA; every module samples, the generator tool is greedy; no verifier
+    # call after the last turn.
+    assert {(m, lora_used, t) for m, lora_used, t in llm.calls} == {
+        ("planner", True, 0.7), ("analysis", False, 0.7), ("executor", False, 0.7), ("verifier", False, 0.7),
+        ("generator", False, 0.7), ("base_generator", False, 0.0)}
     assert sum(m == "verifier" for m, _, _ in llm.calls) == 2 + 1  # step 1: A and B, step 2: B
 
 
@@ -98,20 +100,25 @@ def test_unknown_tool_and_bad_command_become_error_results():
     assert results[0].startswith("Error:") and results[1].startswith("Error:")
 
 
-def test_judge_reads_the_verdict(monkeypatch):
-    replies = iter(["<analysis>: same\n<true_false>: True", "<analysis>: differs\n<true_false>: \"False\"", "?"])
+def test_judge_reads_the_verdict_and_asks_once_per_answer(monkeypatch):
+    prompts = []
 
     class Client:
         def __init__(self, **kwargs):
             self.chat = SimpleNamespace(completions=SimpleNamespace(create=self.create))
 
-        def create(self, **kwargs):
-            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=next(replies)))])
+        def create(self, messages, **kwargs):
+            prompts.append(messages[0]["content"])
+            verdict = {"yes": "<analysis>: same\n<true_false>: True", "no": '<true_false>: "False"'}
+            reply = next((v for k, v in verdict.items() if f"Model Response: {k}" in prompts[-1]), "?")
+            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=reply))])
 
     monkeypatch.setenv("OPENCODE_GO_API_KEY", "test")
     monkeypatch.setattr("openai.OpenAI", Client)
-    assert agentflow.judge(["q"] * 3, ["a"] * 3, [["b"]] * 3, workers=1) == [1.0, 0.0, 0.0]
-    assert agentflow.judge(["q"], ["The A."], [["a"]]) == [1.0]  # exact match: no call (replies is empty)
+    assert agentflow.judge(["q", "q", "q", "p", "q"], ["yes", "no", "garbled", "yes", "yes"], [["a"]] * 5) == \
+        [1.0, 0.0, 0.0, 1.0, 1.0]
+    assert len(prompts) == 4                                    # ("q", "yes") is judged once
+    assert agentflow.judge(["q"], ["The A."], [["a"]]) == [1.0] and len(prompts) == 4  # exact match: no call
 
 
 def test_exact_match():

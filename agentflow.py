@@ -7,9 +7,11 @@ turn the solution generator writes the answer from the memory. The prompts are t
 (github.com/lupantech/AgentFlow, agentflow/models/{planner,executor,verifier}.py, text-only branch).
 
 As in the official code, only the planner's next-step calls are the trained policy (they get the LoRA
-through `lora_request` and are sampled); the query analysis, executor, verifier, generator and the
-Base_Generator tool are the frozen Qwen2.5-7B-Instruct at temperature 0. All questions advance together:
-each module call is one batched vLLM generate over the questions that are still running.
+through `lora_request`); the query analysis, executor, verifier and generator are the frozen
+Qwen2.5-7B-Instruct, and every module samples at the same temperature (the official solver passes one
+temperature to all of them); the Base_Generator tool runs at temperature 0, as the paper's tool engines
+do. All questions advance together: each module call is one batched vLLM generate over the questions
+that are still running.
 
 Tools: Base_Generator_Tool (the base model answers the tool query) and Wikipedia_Search_Tool, which here
 is Search-R1's E5 retriever over the 2018 Wikipedia dump (top 3 passages) instead of the official
@@ -271,7 +273,7 @@ def solve(llm, tokenizer, retriever, questions, max_steps, temperature, lora_req
     fill = dict(tools=TOOLS, toolbox=TOOLBOX)
     episodes = [Episode(q) for q in questions]
     for ep, out in zip(episodes, generate(llm, [chat(tokenizer, QUERY_ANALYSIS.format(question=q, **fill))
-                                               for q in questions], 1024)):
+                                               for q in questions], 1024, temperature)):
         ep.analysis = out.outputs[0].text
     for step in range(1, max_steps + 1):
         active = [ep for ep in episodes if not ep.done]
@@ -288,7 +290,8 @@ def solve(llm, tokenizer, retriever, questions, max_steps, temperature, lora_req
         prompts = [chat(tokenizer, TOOL_COMMAND.format(question=ep.question, sub_goal=sub_goal, tool_name=tool,
                                                        tool_metadata=TOOLBOX.get(tool), context=context))
                    for ep, (context, sub_goal, tool) in zip(active, plans)]
-        commands = [o.outputs[0].text.split("Generated Command:")[-1].strip() for o in generate(llm, prompts, 512)]
+        commands = [o.outputs[0].text.split("Generated Command:")[-1].strip()
+                    for o in generate(llm, prompts, 512, temperature)]
         results = run_tools(llm, tokenizer, retriever, [(tool, c) for (_, _, tool), c in zip(plans, commands)])
         for ep, (_, sub_goal, tool), command, result in zip(active, plans, commands, results):
             ep.memory[f"Action Step {step}"] = {"tool_name": tool, "sub_goal": sub_goal, "command": command,
@@ -297,12 +300,12 @@ def solve(llm, tokenizer, retriever, questions, max_steps, temperature, lora_req
             break
         prompts = [chat(tokenizer, VERIFY.format(question=ep.question, analysis=ep.analysis, memory=ep.memory,
                                                  **fill)) for ep in active]
-        for ep, out in zip(active, generate(llm, prompts, 1024)):
+        for ep, out in zip(active, generate(llm, prompts, 1024, temperature)):
             verdicts = CONCLUSION.findall(out.outputs[0].text)
             ep.done = bool(verdicts) and verdicts[-1] == "STOP"
     prompts = [chat(tokenizer, SOLUTION.format(question=ep.question, analysis=ep.analysis, memory=ep.memory))
                for ep in episodes]
-    for ep, out in zip(episodes, generate(llm, prompts, 1024)):
+    for ep, out in zip(episodes, generate(llm, prompts, 1024, temperature)):
         ep.output = out.outputs[0].text
     return episodes
 
@@ -316,7 +319,8 @@ def final_answer(output):
 def judge(questions, responses, golden_answers, workers=8):
     """1.0 / 0.0 per response: the official LLM-as-judge prompt, temperature 0, without thinking.
 
-    An exact match is correct without asking the judge (it saves about a third of the calls). The API
+    An exact match is correct without asking the judge, and a response repeated for the same question
+    is judged once (together they save most of the calls in training). The API
     allows 20 requests in flight per account, shared by all running jobs; a refused request (429) is
     retried with backoff."""
     from openai import OpenAI
@@ -334,8 +338,11 @@ def judge(questions, responses, golden_answers, workers=8):
         verdict = VERDICT.findall(reply.choices[0].message.content or "")
         return float(bool(verdict) and verdict[-1].lower() == "true")
 
+    items = list(zip(questions, responses, [list(g) for g in golden_answers]))
+    unique = list({(q, r): (q, r, g) for q, r, g in items}.values())
     with ThreadPoolExecutor(workers) as pool:
-        return list(pool.map(one, zip(questions, responses, golden_answers)))
+        verdicts = {(q, r): v for (q, r, _), v in zip(unique, pool.map(one, unique))}
+    return [verdicts[q, r] for q, r, _ in items]
 
 
 def normalize_answer(s):
