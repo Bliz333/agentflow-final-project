@@ -1,7 +1,7 @@
 """Flow-GRPO (AgentFlow, Eq. 5) with LoRA: train the planner of agentflow.py on Search-R1's NQ + HotpotQA.
 
-Each step: 32 questions x 8 AgentFlow rollouts (at most 3 turns, planner temperature 0.7); the judge
-scores every final answer 1 / 0. A rollout's reward, normalised within its group of 8 (Eq. 7), is the
+Each step: 32 questions x 8 AgentFlow rollouts (at most 3 turns, temperature 0.7); the judge (the local
+Qwen2.5-7B-Instruct with the official judge prompt) scores every final answer 1 / 0. A rollout's reward, normalised within its group of 8 (Eq. 7), is the
 advantage of every planner turn in it (Eq. 4: the final outcome is broadcast to all turns). Then 4
 minibatch updates of the clipped objective (clip 0.2 / 0.3) plus a KL penalty to the base model (k3,
 beta 0.001), averaged over all planner tokens of the minibatch, as the official verl code does.
@@ -134,7 +134,7 @@ def main():
         t1 = time.time()
         rewards = agentflow.judge([q for q, _ in batch for _ in range(args.group)],
                                   [agentflow.final_answer(ep.output) for ep in episodes],
-                                  [g for _, g in batch for _ in range(args.group)])
+                                  [g for _, g in batch for _ in range(args.group)], llm, tokenizer)
         r = torch.tensor(rewards).view(args.questions, args.group)
         advantages = ((r - r.mean(1, keepdim=True)) / (r.std(1, keepdim=True) + 1e-6)).flatten().tolist()
         t2 = time.time()

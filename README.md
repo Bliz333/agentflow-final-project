@@ -36,8 +36,9 @@ turns in training and 10 in evaluation, LLM-as-judge reward (1 / 0) with the off
   Google Search through *Gemini 2.5 Flash* with Google grounding, and a Wikipedia tool that needs
   OpenAI embeddings and gpt-4o-mini; those need paid API keys, and a local search engine keeps
   training fast and repeatable. This is the main reason the absolute numbers are lower than the paper's.
-- **Judge**: DeepSeek V4.1 Flash instead of GPT-4o, same prompt, for both the training reward and the
-  evaluation. Exact match is reported next to it.
+- **Judge**: the official judge prompt, but GPT-4o is replaced by DeepSeek V4.1 Flash for evaluation and
+  by the local Qwen2.5-7B-Instruct for the training reward: the DeepSeek API answers only about 40
+  requests a minute, which made judging 75 % of a training step. Exact match is reported next to it.
 - **Training data**: Search-R1's NQ + HotpotQA questions only (the paper mixes in DeepMath, which a
   search benchmark does not need).
 - Every module samples at temperature 0.7 in training and evaluation, as the official training code

@@ -185,7 +185,7 @@ Output Structure:
 2.  **Answer:** A direct and concise final answer to the query.
 """
 
-# The official reward / evaluation judge (train/utils.py), run by DeepSeek V4.1 Flash instead of GPT-4o.
+# The official reward / evaluation judge (train/utils.py); GPT-4o in the paper, see judge().
 JUDGE_URL = "https://opencode.ai/zen/go/v1"  # OpenCode Go, OpenAI-compatible; key in OPENCODE_GO_API_KEY
 JUDGE_MODEL = "deepseek-v4.1-flash"
 JUDGE = """
@@ -316,32 +316,36 @@ def final_answer(output):
     return matches[-1].strip() if matches else output.strip()
 
 
-def judge(questions, responses, golden_answers, workers=8):
-    """1.0 / 0.0 per response: the official LLM-as-judge prompt, temperature 0, without thinking.
+def judge(questions, responses, golden_answers, llm=None, tokenizer=None, workers=8):
+    """1.0 / 0.0 per response with the official judge prompt, greedy.
 
-    An exact match is correct without asking the judge, and a response repeated for the same question
-    is judged once (together they save most of the calls in training). The API
-    allows 20 requests in flight per account, shared by all running jobs; a refused request (429) is
-    retried with backoff."""
-    from openai import OpenAI
-    client = OpenAI(base_url=JUDGE_URL, api_key=os.environ["OPENCODE_GO_API_KEY"], timeout=120, max_retries=100,
-                    default_headers={"x-opencode-session": f"info7375-w9-{os.getpid()}"})
-
-    def one(item):
-        question, response, truth = item
-        if exact_match(response, truth):
-            return 1.0
-        prompt = JUDGE.format(question=question, response=response, truth=truth)
-        reply = client.chat.completions.create(model=JUDGE_MODEL, temperature=0,
-                                               messages=[{"role": "user", "content": prompt}],
-                                               extra_body={"thinking": {"type": "disabled"}})
-        verdict = VERDICT.findall(reply.choices[0].message.content or "")
-        return float(bool(verdict) and verdict[-1].lower() == "true")
-
+    Evaluation asks DeepSeek V4.1 Flash (without thinking); training passes its vLLM engine as `llm` and
+    the judge is the local Qwen2.5-7B-Instruct, because the API answers only about 40 requests a minute
+    (a refused request, 429, is retried with backoff). An exact match is correct without a judge, and a
+    response repeated for the same question is judged once."""
     items = list(zip(questions, responses, [list(g) for g in golden_answers]))
     unique = list({(q, r): (q, r, g) for q, r, g in items}.values())
-    with ThreadPoolExecutor(workers) as pool:
-        verdicts = {(q, r): v for (q, r, _), v in zip(unique, pool.map(one, unique))}
+    todo = [(q, r, g) for q, r, g in unique if not exact_match(r, g)]
+    prompts = [JUDGE.format(question=q, response=r, truth=g) for q, r, g in todo]
+    if llm is not None:
+        replies = [o.outputs[0].text for o in generate(llm, [chat(tokenizer, p) for p in prompts], 512)]
+    else:
+        from openai import OpenAI
+        client = OpenAI(base_url=JUDGE_URL, api_key=os.environ["OPENCODE_GO_API_KEY"], timeout=120,
+                        max_retries=100, default_headers={"x-opencode-session": f"info7375-w9-{os.getpid()}"})
+
+        def ask(prompt):
+            reply = client.chat.completions.create(model=JUDGE_MODEL, temperature=0,
+                                                   messages=[{"role": "user", "content": prompt}],
+                                                   extra_body={"thinking": {"type": "disabled"}})
+            return reply.choices[0].message.content or ""
+
+        with ThreadPoolExecutor(workers) as pool:
+            replies = list(pool.map(ask, prompts))
+    verdicts = {(q, r): 1.0 for q, r, _ in unique}
+    for (q, r, _), reply in zip(todo, replies):
+        found = VERDICT.findall(reply)
+        verdicts[q, r] = float(bool(found) and found[-1].lower() == "true")
     return [verdicts[q, r] for q, r, _ in items]
 
 

@@ -119,6 +119,12 @@ def test_judge_reads_the_verdict_and_asks_once_per_answer(monkeypatch):
         [1.0, 0.0, 0.0, 1.0, 1.0]
     assert len(prompts) == 4                                    # ("q", "yes") is judged once
     assert agentflow.judge(["q"], ["The A."], [["a"]]) == [1.0] and len(prompts) == 4  # exact match: no call
+    # Training: the same prompts go to the local vLLM engine instead.
+    llm, tokenizer = ScriptedLLM(), SimpleNamespace(apply_chat_template=lambda m, **kw: m[-1]["content"])
+    llm.generate = lambda ps, params, **kw: [SimpleNamespace(outputs=[SimpleNamespace(
+        text="<true_false>: True" if "Model Response: yes" in p else "<true_false>: False")]) for p in ps]
+    assert agentflow.judge(["q", "q"], ["yes", "no"], [["a"]] * 2, llm, tokenizer) == [1.0, 0.0]
+    assert len(prompts) == 4                                    # no API call
 
 
 def test_exact_match():
