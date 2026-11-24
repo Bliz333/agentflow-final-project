@@ -1,4 +1,10 @@
-# Week 9 — Final project, part 1: AgentFlow + Flow-GRPO with LoRA (Qwen2.5-7B-Instruct, Bamboogle)
+# AgentFlow + Flow-GRPO with LoRA (Qwen2.5-7B-Instruct) — INFO 7375 final project
+
+**Team**: Tianyue Gao, Shizhao Han, Shancheng Mi, Hoi Shan Tang. Team repository:
+[Bliz333/agentflow-final-project](https://github.com/Bliz333/agentflow-final-project) (private); the
+course submission is a copy of it in the course repository's `week_09/`.
+
+## Part 1 — Bamboogle
 
 Replication of three Bamboogle rows of Table 1 of **AgentFlow** (Li et al., 2025,
 [arXiv 2510.05592](https://arxiv.org/abs/2510.05592)): *Qwen-2.5-7B-Instruct*, *AgentFlow* (untrained)
@@ -9,7 +15,8 @@ and *AgentFlow w/ Flow-GRPO*, training the planner with **LoRA** instead of full
 | [`agentflow.py`](agentflow.py) | The AgentFlow loop (planner → executor → tool → verifier, then the solution generator), the official prompts, the two tools and the judge |
 | [`train.py`](train.py) | Flow-GRPO: 32 questions × 8 rollouts per step, outcome reward broadcast to every planner turn, group-normalised advantage, clipped objective + KL, LoRA |
 | [`evaluate.py`](evaluate.py) | Bamboogle: `direct` (the base model alone) and `agentflow` (untrained or with an adapter, 3 trials) |
-| [`retriever.py`](retriever.py) | Search-R1's E5 search over the 2018 Wikipedia dump, unchanged from week 8 |
+| [`retriever.py`](retriever.py) | Search-R1's E5 search over the 2018 Wikipedia dump (from our Search-R1 replication) |
+| [`prep_index.py`](prep_index.py) | Builds `data/retrieval` from the files Search-R1 publishes (run once) |
 | [`diagnose.py`](diagnose.py) | Where the reward differences within a group come from (section 1) |
 | [`results/`](results/) | Evaluation results (without the per-question memory, 5 MB each) and training metrics per step |
 | [`test_agentflow.py`](test_agentflow.py) | Tests without a GPU model: the loop with a scripted LLM, parsers, judge, the Flow-GRPO update on a tiny random model, checkpoints |
@@ -108,13 +115,42 @@ training and 10 in evaluation, the official judge prompt, 3 evaluation trials.
 
 ## 3. How to run
 
-The cluster layout is `/scratch/$USER/info7375-w9/{code,data,runs,results,logs}`; `data/` holds the
-week 8 retrieval files (`retrieval/`, `nq_hotpotqa_train/`, `bamboogle.csv`, see week 8's README for
-how they are built) and the judge key is read from `~/.config/info7375/judge.env`
-(`OPENCODE_GO_API_KEY=...`). The Python environment is week 8's (torch 2.13, vLLM 0.32, PEFT 0.21).
+Tests need no GPU: `python -m pytest -q test_agentflow.py`. Training and evaluation need one GPU with
+141 GB (H200) for training, 80 GB for evaluation, and about 110 GB of disk for the retrieval data.
+
+**Environment** (cluster nodes have CUDA 12.x drivers, hence the `cu129` builds):
 
 ```bash
-python -m pytest -q test_agentflow.py                     # no GPU needed
+uv venv --seed --python 3.12 /scratch/$USER/envs/agentflow   # the path cluster/env.sh uses
+uv pip install --python /scratch/$USER/envs/agentflow/bin/python --index-strategy unsafe-best-match \
+  --extra-index-url https://download.pytorch.org/whl/cu129 \
+  "torch==2.13.0+cu129" "torchvision==0.28.0+cu129" "torchaudio==2.11.0+cu129" \
+  "vllm @ https://github.com/vllm-project/vllm/releases/download/v0.32.0/vllm-0.32.0+cu129-cp38-abi3-manylinux_2_28_x86_64.whl" \
+  -r requirements.txt
+```
+
+**Data** (in `data/` next to the code):
+
+```bash
+hf download --repo-type dataset PeterJinGo/nq_hotpotqa_train --local-dir data/nq_hotpotqa_train
+hf download --repo-type dataset PeterJinGo/wiki-18-corpus --local-dir data/wiki-18-corpus
+hf download --repo-type dataset PeterJinGo/wiki-18-e5-index --local-dir data/wiki-18-e5-index
+curl -L -o data/bamboogle.csv "https://docs.google.com/spreadsheets/d/1jwcsA5kE4TObr9YHn9Gc-wQHYjTbLhDGx6tmIzMhl_U/export?format=csv&gid=0"
+python prep_index.py --index-dir data/wiki-18-e5-index --corpus data/wiki-18-corpus/wiki-18.jsonl.gz --out data/retrieval
+export HF_HOME=/scratch/$USER/hf-home    # the jobs run with HF_HUB_OFFLINE=1 and read the models from here
+hf download Qwen/Qwen2.5-7B-Instruct
+hf download intfloat/e5-base-v2
+```
+
+**Judge**: an OpenCode Go key in `~/.config/info7375/judge.env` as `OPENCODE_GO_API_KEY=...` (any
+OpenAI-compatible API works by changing `JUDGE_URL` / `JUDGE_MODEL` in `agentflow.py`).
+
+**On the NEU Explorer cluster** the scripts expect `/scratch/$USER/info7375-w9/{code,data,runs,results,logs}`
+(code = this repository, `code/data` a link to `../data`); set your Slurm account (`-A`) in
+`cluster/*.sbatch`.
+
+```bash
+W=/scratch/$USER/info7375-w9
 sbatch -J eval cluster/eval.sbatch --mode direct --out $W/results/direct.json
 sbatch -J eval cluster/eval.sbatch --mode agentflow --out $W/results/agentflow.json
 sbatch -J flow_grpo cluster/train.sbatch --steps 200 --lr 1e-4   # a chain of 1-hour links

@@ -1,0 +1,7 @@
+# torch 2.13.0 and vLLM 0.32.0 are installed as CUDA 12.9 builds by the command in README section 3.
+transformers==5.19.0
+peft==0.21.2
+openai
+pandas
+pyarrow
+pytest
