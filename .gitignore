@@ -1,0 +1,5 @@
+# Retrieval data (~110 GB), training runs and Python caches stay out of git.
+data/
+runs/
+__pycache__/
+.pytest_cache/

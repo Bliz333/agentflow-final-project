@@ -121,8 +121,8 @@ Tests need no GPU: `python -m pytest -q test_agentflow.py`. Training and evaluat
 **Environment** (cluster nodes have CUDA 12.x drivers, hence the `cu129` builds):
 
 ```bash
-uv venv --seed --python 3.12 ~/envs/agentflow
-uv pip install --python ~/envs/agentflow/bin/python --index-strategy unsafe-best-match \
+uv venv --seed --python 3.12 /scratch/$USER/envs/agentflow   # the path cluster/env.sh uses
+uv pip install --python /scratch/$USER/envs/agentflow/bin/python --index-strategy unsafe-best-match \
   --extra-index-url https://download.pytorch.org/whl/cu129 \
   "torch==2.13.0+cu129" "torchvision==0.28.0+cu129" "torchaudio==2.11.0+cu129" \
   "vllm @ https://github.com/vllm-project/vllm/releases/download/v0.32.0/vllm-0.32.0+cu129-cp38-abi3-manylinux_2_28_x86_64.whl" \
@@ -137,14 +137,17 @@ hf download --repo-type dataset PeterJinGo/wiki-18-corpus --local-dir data/wiki-
 hf download --repo-type dataset PeterJinGo/wiki-18-e5-index --local-dir data/wiki-18-e5-index
 curl -L -o data/bamboogle.csv "https://docs.google.com/spreadsheets/d/1jwcsA5kE4TObr9YHn9Gc-wQHYjTbLhDGx6tmIzMhl_U/export?format=csv&gid=0"
 python prep_index.py --index-dir data/wiki-18-e5-index --corpus data/wiki-18-corpus/wiki-18.jsonl.gz --out data/retrieval
+export HF_HOME=/scratch/$USER/hf-home    # the jobs run with HF_HUB_OFFLINE=1 and read the models from here
+hf download Qwen/Qwen2.5-7B-Instruct
+hf download intfloat/e5-base-v2
 ```
 
 **Judge**: an OpenCode Go key in `~/.config/info7375/judge.env` as `OPENCODE_GO_API_KEY=...` (any
 OpenAI-compatible API works by changing `JUDGE_URL` / `JUDGE_MODEL` in `agentflow.py`).
 
 **On the NEU Explorer cluster** the scripts expect `/scratch/$USER/info7375-w9/{code,data,runs,results,logs}`
-(code = this repository, `code/data` a link to `../data`); set the environment path in
-`cluster/env.sh` and your Slurm account (`-A`) in `cluster/*.sbatch`.
+(code = this repository, `code/data` a link to `../data`); set your Slurm account (`-A`) in
+`cluster/*.sbatch`.
 
 ```bash
 W=/scratch/$USER/info7375-w9
