@@ -1,0 +1,10 @@
+# The environment of the reported runs (on the NEU Explorer cluster with the CUDA 12.9 builds of torch
+# and vLLM, see README section 3).
+torch==2.13.0
+vllm==0.32.0
+transformers==5.19.0
+peft==0.21.2
+openai
+pandas
+pyarrow
+pytest

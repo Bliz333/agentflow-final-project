@@ -10,7 +10,7 @@ minibatch updates of the clipped objective (clip 0.2 / 0.3) plus a KL penalty to
 beta 0.001), averaged over all planner tokens of the minibatch, as the official verl code does.
 
 The old log-probs are vLLM's sampling log-probs (after temperature). vLLM gets the current LoRA as a
-LoRA adapter every step, not merged into the bf16 weights (merging loses small updates, see week 8).
+LoRA adapter every step, not merged into the bf16 weights (merging rounds most small updates away).
 A checkpoint (adapter + optimizer) is written after every step; --resume continues from the last one.
     python train.py --out runs/flow_grpo --lr 1e-4
 """
