@@ -27,6 +27,7 @@ standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact matc
 | (AgentFlow, untrained, only the planner sampling) | | 45.3 ± 2.0 [EM 20.8] |
 | AgentFlow w/ Flow-GRPO (LoRA), step 30 / 60 / 90 | 69.6 | 46.1 ± 1.0 / **46.9 ± 1.4** / 44.3 ± 1.6 [EM 14.9 / 17.9 / 15.5] |
 | (Flow-GRPO with the frozen modules greedy in training, step 60) | | 44.5 ± 3.1 [EM 16.8] |
+| (same with 96 questions per step, step 30 / 60) | | 46.7 ± 2.6 / 45.3 ± 1.4 [EM 17.6 / 15.5] |
 
 - **Qwen-2.5-7B-Instruct**: the paper's 12.0 is Search-R1's exact-match number for this prompt; our
   exact match is 10.4 (13 of 125 against 15). The judge also accepts answers like "1837" for
@@ -41,16 +42,18 @@ standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact matc
   moved away from the base model (KL to the base 0.45 per token at step 100), and runs with learning
   rates 1e-4 and 3e-5, which see the same questions at every step, got the same rewards (mean paired
   difference −0.004 over 37 steps). Training with the frozen modules greedy, so that the reward
-  differences within a group come from the planner alone (below), did not help either: +0.8 at step 60.
+  differences within a group come from the planner alone (below), did not help either: +0.8 at step 60,
+  and with 96 questions per step (about 24 groups with a training signal per step instead of 8) +2.9 / +1.6
+  at steps 30 / 60, again with intervals that include 0.
 
 | Run (`results/metrics/`) | Setting | Steps |
 |---|---|---|
 | `flow_grpo_lr1e-4` | the reported run: every module at 0.7, learning rate 1e-4 | 101 |
 | `flow_grpo_lr3e-5` | learning rate 3e-5, stopped when its rewards matched the 1e-4 run | 37 |
 | `flow_grpo_lr1e-4_greedy` | frozen modules greedy (`--module-temperature 0`) | 75 |
-| `flow_grpo_greedy_q96` | frozen modules greedy, 96 questions per step | in progress |
+| `flow_grpo_greedy_q96` | frozen modules greedy, 96 questions per step | 72 |
 
-The first three runs used the reward rule on substrings; `train.py` now matches whole words (a
+The first three runs used the reward rule on substrings, the last one whole words, as `train.py` now does (a
 golden "8" no longer matches "1988"), which changes the reward only for the 3.4 % of training
 questions with a golden answer of at most two characters.
 
