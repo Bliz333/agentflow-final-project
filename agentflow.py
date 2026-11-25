@@ -13,10 +13,10 @@ temperature to all of them); the Base_Generator tool runs at temperature 0, as t
 do. All questions advance together: each module call is one batched vLLM generate over the questions
 that are still running.
 
-Tools: Base_Generator_Tool (the base model answers the tool query) and Wikipedia_Search_Tool, either the
+Tools: Base_Generator_Tool (the base model answers the tool query), Wikipedia_Search_Tool, either the
 official tool on live Wikipedia (wikipedia.LiveWikipedia) or Search-R1's E5 retriever over the 2018
-Wikipedia dump (LocalWikipedia, top 3 passages). The official Google_Search_Tool (Gemini 2.5 Flash with
-Google grounding) is left out: it needs a Google API key.
+Wikipedia dump (LocalWikipedia, top 3 passages), and optionally Google_Search_Tool, the official tool with
+DeepSeek's web search in place of Gemini 2.5 Flash with Google grounding (google_search.DeepSeekSearch).
 """
 import os
 import re
@@ -40,9 +40,7 @@ TOOLBOX = {
         "demo_commands": [{"command": 'execution = tool.execute(query="Summarize the following text in a few lines")',
                            "description": "Generate a short summary given the query from the user."}],
     },
-    "Wikipedia_Search_Tool": None,  # the search backend's metadata, see solve()
-}
-TOOLS = list(TOOLBOX)
+}  # and the search backends' metadata, see solve()
 
 
 class LocalWikipedia:
@@ -250,44 +248,47 @@ def generate(llm, prompts, max_tokens, temperature=0.0, lora_request=None):
     return llm.generate(prompts, params, lora_request=lora_request, use_tqdm=False)
 
 
-def parse_plan(text):
-    """(context, sub_goal, tool_name) from the planner's answer, as the official regex fallback does."""
+def parse_plan(text, tools):
+    """(context, sub_goal, tool_name) from the planner's answer, as the official regex fallback does; tool_name
+    is one of `tools` or None."""
     matches = PLAN.findall(text.replace("**", ""))
     if not matches:
         return "", "", None
     context, sub_goal, tool = (s.strip() for s in matches[-1])
     key = tool.lower().replace(" ", "_")  # e.g. "Wikipedia Search Tool", "wikipedia_search", "Wikipedia"
-    return context, sub_goal, next((t for t in TOOLS if t.lower().removesuffix("_tool") in key
+    return context, sub_goal, next((t for t in tools if t.lower().removesuffix("_tool") in key
                                     or key and t.lower().startswith(key)), None)
 
 
-def run_tools(llm, tokenizer, wikipedia, calls):
-    """Results of (tool_name, command) calls; Wikipedia searches and generator calls each run as one batch."""
+def run_tools(llm, tokenizer, wikipedia, calls, google=None):
+    """Results of (tool_name, command) calls; each tool's calls run as one batch."""
+    tools = {"Base_Generator_Tool": lambda qs: [o.outputs[0].text for o in
+                                                generate(llm, [chat(tokenizer, q) for q in qs], 1024)],
+             "Wikipedia_Search_Tool": lambda qs: wikipedia.run(qs, llm, tokenizer)}
+    if google:
+        tools["Google_Search_Tool"] = google.run
     queries = [COMMAND.search(command) for _, command in calls]
-    results = [f"Error: {tool!r} is not an available tool." if tool not in TOOLBOX else
+    results = [f"Error: {tool!r} is not an available tool." if tool not in tools else
                "Error: the command has no execution = tool.execute(query=\"...\") call." for tool, _ in calls]
-    for name in TOOLS:
+    for name, run in tools.items():
         idx = [i for i, ((tool, _), q) in enumerate(zip(calls, queries)) if tool == name and q]
         if not idx:
             continue
-        if name == "Wikipedia_Search_Tool":
-            outputs = wikipedia.run([queries[i].group(2) for i in idx], llm, tokenizer)
-        else:
-            outputs = [o.outputs[0].text for o in generate(llm, [chat(tokenizer, queries[i].group(2)) for i in idx],
-                                                           1024)]
-        for i, out in zip(idx, outputs):
+        for i, out in zip(idx, run([queries[i].group(2) for i in idx])):
             results[i] = out
     return results
 
 
 def solve(llm, tokenizer, wikipedia, questions, max_steps, temperature, lora_request=None, planner_tokens=2048,
-          module_temperature=None):
+          module_temperature=None, google=None):
     """Run AgentFlow on questions (strings, ANSWER_FORMAT already appended); one Episode per question.
 
-    `temperature` is the planner's; the other modules use `module_temperature` (default: the same)."""
+    `temperature` is the planner's; the other modules use `module_temperature` (default: the same).
+    `google` is the Google_Search_Tool's backend (none = the tool is left out)."""
     module_temperature = temperature if module_temperature is None else module_temperature
-    toolbox = {**TOOLBOX, "Wikipedia_Search_Tool": wikipedia.metadata}
-    fill = dict(tools=TOOLS, toolbox=toolbox)
+    toolbox = {**TOOLBOX, **({"Google_Search_Tool": google.metadata} if google else {}),
+               "Wikipedia_Search_Tool": wikipedia.metadata}  # the official order
+    fill = dict(tools=list(toolbox), toolbox=toolbox)
     episodes = [Episode(q) for q in questions]
     for ep, out in zip(episodes, generate(llm, [chat(tokenizer, QUERY_ANALYSIS.format(question=q, **fill))
                                                for q in questions], 1024, module_temperature)):
@@ -303,13 +304,13 @@ def solve(llm, tokenizer, wikipedia, questions, max_steps, temperature, lora_req
             gen = out.outputs[0]
             ep.turns.append((list(out.prompt_token_ids), list(gen.token_ids),
                              [lp[t].logprob for lp, t in zip(gen.logprobs, gen.token_ids)] if gen.logprobs else None))
-            plans.append(parse_plan(gen.text))
+            plans.append(parse_plan(gen.text, fill["tools"]))
         prompts = [chat(tokenizer, TOOL_COMMAND.format(question=ep.question, sub_goal=sub_goal, tool_name=tool,
                                                        tool_metadata=toolbox.get(tool), context=context))
                    for ep, (context, sub_goal, tool) in zip(active, plans)]
         commands = [o.outputs[0].text.split("Generated Command:")[-1].strip()
                     for o in generate(llm, prompts, 512, module_temperature)]
-        results = run_tools(llm, tokenizer, wikipedia, [(tool, c) for (_, _, tool), c in zip(plans, commands)])
+        results = run_tools(llm, tokenizer, wikipedia, [(tool, c) for (_, _, tool), c in zip(plans, commands)], google)
         for ep, (_, sub_goal, tool), command, result in zip(active, plans, commands, results):
             ep.memory[f"Action Step {step}"] = {"tool_name": tool, "sub_goal": sub_goal, "command": command,
                                                 "result": result}
