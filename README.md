@@ -12,12 +12,13 @@ and *AgentFlow w/ Flow-GRPO*, training the planner with **LoRA** instead of full
 
 | File | What it is |
 |---|---|
-| [`agentflow.py`](agentflow.py) | The AgentFlow loop (planner → executor → tool → verifier, then the solution generator), the official prompts, the two tools and the judge |
+| [`agentflow.py`](agentflow.py) | The AgentFlow loop (planner → executor → tool → verifier, then the solution generator), the official prompts, the tools and the judge |
 | [`train.py`](train.py) | Flow-GRPO: 32 questions × 8 rollouts per step, outcome reward broadcast to every planner turn, group-normalised advantage, clipped objective + KL, LoRA |
 | [`evaluate.py`](evaluate.py) | Bamboogle: `direct` (the base model alone) and `agentflow` (untrained or with an adapter, 3 trials) |
 | [`retriever.py`](retriever.py) | Search-R1's E5 search over the 2018 Wikipedia dump (from our Search-R1 replication) |
 | [`prep_index.py`](prep_index.py) | Builds `data/retrieval` from the files Search-R1 publishes (run once) |
 | [`wikipedia.py`](wikipedia.py) | The official Wikipedia_Search_Tool on live Wikipedia (`--search wikipedia`, section 1) |
+| [`google_search.py`](google_search.py) | The official Google_Search_Tool with DeepSeek's web search in place of Gemini (`--google-search`, section 1) |
 | [`diagnose.py`](diagnose.py) | Where the reward differences within a group come from (section 1) |
 | [`modal_app.py`](modal_app.py) | Runs `evaluate.py` on one Modal GPU |
 | [`results/`](results/) | Evaluation results (without the per-question memory, 5 MB each) and training metrics per step |
@@ -33,6 +34,7 @@ standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact matc
 |---|---|---|
 | Qwen-2.5-7B-Instruct (no tools) | 12.0 | 18.4 [EM 10.4] |
 | AgentFlow, untrained | 58.4 | **43.7 ± 2.0** [EM 14.7] |
+| (AgentFlow, untrained, with the paper's Google Search tool, below) | 58.4 | **65.1 ± 2.9** [EM 19.2] |
 | (AgentFlow, untrained, only the planner sampling) | | 45.3 ± 2.0 [EM 20.8] |
 | AgentFlow w/ Flow-GRPO (LoRA), step 30 / 60 / 90 | 69.6 | 46.1 ± 1.0 / **46.9 ± 1.4** / 44.3 ± 1.6 [EM 14.9 / 17.9 / 15.5] |
 | (Flow-GRPO with the frozen modules greedy in training, step 60) | | 44.5 ± 3.1 [EM 16.8] |
@@ -44,7 +46,9 @@ standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact matc
 - **AgentFlow** is 15 points below the paper because its search tool is not the paper's: the official
   Bamboogle setup's "Google Search" is Gemini 2.5 Flash answering with Google grounding, ours is
   Search-R1's top-3 passages from the 2018 Wikipedia dump. Our teammates' independent TRL
-  implementation with the same retriever gets 41–43 % (judged by Qwen2.5-7B-Instruct).
+  implementation with the same retriever gets 41–43 % (judged by Qwen2.5-7B-Instruct). With a Google
+  Search tool (DeepSeek's web search standing in for Gemini, end of this section) the same untrained
+  system gets 65.1, 6.7 points above the paper.
 - **Flow-GRPO** did not measurably improve AgentFlow within 100 steps. Paired by question against the
   untrained system, steps 30 / 60 / 90 are +2.4 / +3.2 / +0.5 points, every 95 % bootstrap interval
   includes 0 (step 60: −2.1 to +8.8). The training reward stayed flat (about 0.59) while the planner
@@ -107,6 +111,30 @@ counted refused requests as empty searches scored 39.5 and is discarded.) So the
 is not the Wikipedia tool but the paper's Google Search tool, Gemini 2.5 Flash answering with Google
 grounding, a much stronger model than any module here.
 
+**With the paper's Google Search tool: 65.1.** `google_search.py` is the official `Google_Search_Tool`,
+which sends the query unchanged to Gemini 2.5 Flash with Google Search grounding and returns its answer
+with "[n](url)" citations. Gemini 2.5 Flash is closed to new API users and retired on 1 December 2026, so
+DeepSeek's server-side web search stands in for it (`deepseek-flash`, i.e. DeepSeek-V4.1-Flash, thinking
+off; the query goes to it unchanged, the citations are added the same way, and the planner sees the
+official tool description). Untrained AgentFlow with both search tools
+(`--search wikipedia --google-search`, `results/agentflow_google_search.json`):
+
+| Untrained AgentFlow | Bamboogle accuracy | EM | turns |
+|---|---|---|---|
+| Wikipedia_Search_Tool only (live Wikipedia, above) | 44.3 ± 1.9 | 16.8 | 2.6 |
+| + Google_Search_Tool (DeepSeek web search) | **65.1 ± 2.9** (61.6 / 68.8 / 64.8) | 19.2 | 1.6 |
+
+- Paired by question +20.8 points (95 % interval +13.6 to +28.0; 60 questions better, 14 worse), and
+  +18.1 over the best Flow-GRPO adapter (step 60, trained without this tool).
+- The planner calls Google Search for 59 % of its tool calls (Wikipedia 40 %). 283 of the 375 runs use
+  it and are right 70 % of the time, against 49 % for the runs that do not.
+- Leakage: 3 of the 359 Google Search results cite a page that contains Bamboogle's answers (a GitHub
+  commit, a copy of the dataset on Hugging Face); counting those 3 runs as wrong gives 64.3.
+- So the paper's numbers rest mostly on this tool: a strong model searching the web answers most of
+  Bamboogle's two-hop questions in one call. Without it the planner had little to choose (98 % of its
+  calls went to Wikipedia); with it, which tool to call and what to ask become real choices, the ones
+  Flow-GRPO trains. Flow-GRPO training with this tool has not been run.
+
 ## 2. Setup
 
 **As in the paper / official code** ([github.com/lupantech/AgentFlow](https://github.com/lupantech/AgentFlow)):
@@ -125,6 +153,8 @@ training and 10 in evaluation, the official judge prompt, 3 evaluation trials.
   Google Search through *Gemini 2.5 Flash* with Google grounding, and a Wikipedia tool that needs
   OpenAI embeddings and gpt-4o-mini; those need paid API keys, and a local search engine keeps
   training fast and repeatable. This is the main reason the absolute numbers are lower than the paper's.
+  `--google-search` adds `Google_Search_Tool` with DeepSeek's web search in place of Gemini 2.5 Flash,
+  which is retired; only the evaluation in section 1 uses it, training does not.
 - **Judge**: evaluation uses the official judge prompt with DeepSeek V4.1 Flash instead of GPT-4o;
   exact match is reported next to it. The **training reward** is not an LLM judge but FlashRAG's
   accuracy rule on whole words (a golden answer appears in the final answer): the DeepSeek API answers only about 40
@@ -167,16 +197,21 @@ hf download intfloat/e5-base-v2
 
 **Judge**: an OpenCode Go key in `~/.config/info7375/judge.env` as `OPENCODE_GO_API_KEY=...` (any
 OpenAI-compatible API works by changing `JUDGE_URL` / `JUDGE_MODEL` in `agentflow.py`).
+`--google-search` needs a DeepSeek key (platform.deepseek.com) in `~/.config/info7375/deepseek.env` as
+`DEEPSEEK_API_KEY=...`; OpenCode Go does not pass DeepSeek's web search through.
 
 **On the NEU Explorer cluster** the scripts expect `/scratch/$USER/info7375-w9/{code,data,runs,results,logs}`
 (code = this repository, `code/data` a link to `../data`); set your Slurm account (`-A`) in
 `cluster/*.sbatch`.
 
-On Modal (one H100; the 16-minute full evaluation above cost about $1.1):
+On Modal (one H100; the 16-minute live-Wikipedia evaluation cost about $1.1, the 12-minute one with
+Google Search about $0.9 plus well under $1 of DeepSeek tokens, about 2–3k per search; Modal needs both
+keys in the environment, e.g. `set -a; . ~/.config/info7375/judge.env; . ~/.config/info7375/deepseek.env; set +a`):
 
 ```bash
 modal run modal_app.py::check                     # CPU only: build the image, run the tests
 modal run modal_app.py --args "--mode agentflow --search wikipedia --vllm-mem 0.85" --out results/agentflow_live_wikipedia.json
+modal run modal_app.py --args "--mode agentflow --search wikipedia --google-search" --out results/agentflow_google_search.json
 ```
 
 ```bash
