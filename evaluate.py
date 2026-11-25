@@ -22,6 +22,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import agentflow
+from google_search import DeepSeekSearch
 
 MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
 BAMBOOGLE_CSV = ("https://docs.google.com/spreadsheets/d/1jwcsA5kE4TObr9YHn9Gc-wQHYjTbLhDGx6tmIzMhl_U"
@@ -96,6 +97,8 @@ def main():
     parser.add_argument("--out", required=True)
     parser.add_argument("--search", choices=["local", "wikipedia"], default="local",
                         help="Wikipedia_Search_Tool: Search-R1's local retriever or the official tool on live Wikipedia")
+    parser.add_argument("--google-search", action="store_true",
+                        help="add the official Google_Search_Tool, answered by DeepSeek's web search (DEEPSEEK_API_KEY)")
     parser.add_argument("--retrieval", default="data/retrieval")
     parser.add_argument("--bamboogle", default="data/bamboogle.csv")
     parser.add_argument("--trials", type=int, default=3)
@@ -130,12 +133,14 @@ def main():
         trials.append(score(data, [o.outputs[0].text for o in outputs]))
     else:
         wikipedia = search_tool(args)  # before vLLM, which then takes its share of the GPU
+        google = DeepSeekSearch() if args.google_search else None
         llm = api or LLM(args.model, dtype="bfloat16", max_model_len=32768, gpu_memory_utilization=args.vllm_mem or 0.45,
                          seed=0, enable_lora=bool(args.adapter), max_lora_rank=16)
         lora = LoRARequest("adapter", 1, str(args.adapter)) if args.adapter else None
         questions = [f"{x['question']} {agentflow.ANSWER_FORMAT}" for x in data]
         for trial in range(args.trials):
-            episodes = agentflow.solve(llm, tokenizer, wikipedia, questions, args.max_steps, args.temperature, lora)
+            episodes = agentflow.solve(llm, tokenizer, wikipedia, questions, args.max_steps, args.temperature, lora,
+                                       google=google)
             rows = score(data, [ep.output for ep in episodes])
             for row, ep in zip(rows, episodes):
                 row["memory"] = ep.memory

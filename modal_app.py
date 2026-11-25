@@ -3,8 +3,8 @@
     modal run modal_app.py::check                     # CPU only: build the image, run the tests
     modal run modal_app.py --args "--mode agentflow --search wikipedia --limit 5 --trials 1" --out results/smoke.json
 
-Both commands need the judge key (OPENCODE_GO_API_KEY) in the local environment: it is passed to the run and
-not stored in the Modal workspace.
+Both commands need the judge key (OPENCODE_GO_API_KEY) and the DeepSeek key (DEEPSEEK_API_KEY, for
+--google-search) in the local environment: they are passed to the run and not stored in the Modal workspace.
 """
 import shlex
 import subprocess
@@ -36,7 +36,7 @@ def check():
 
 
 @app.function(gpu="H100", timeout=4 * 3600, volumes={"/root/.cache/huggingface": weights},
-              secrets=[modal.Secret.from_local_environ(["OPENCODE_GO_API_KEY"])])
+              secrets=[modal.Secret.from_local_environ(["OPENCODE_GO_API_KEY", "DEEPSEEK_API_KEY"])])
 def evaluate(args: str) -> bytes:
     out = "/tmp/result.json"
     try:

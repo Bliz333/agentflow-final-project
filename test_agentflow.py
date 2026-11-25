@@ -9,6 +9,7 @@ from peft import LoraConfig, get_peft_model
 from transformers import AutoModelForCausalLM, Qwen2Config
 
 import agentflow
+import google_search
 import train
 import wikipedia
 
@@ -58,14 +59,17 @@ class FakeRetriever:
 
 
 def test_parse_plan_matches_tool_names_loosely():
-    assert agentflow.parse_plan(PLAN.format(topic="x", tool="Wikipedia_Search_Tool")) == \
+    tools = ["Base_Generator_Tool", "Wikipedia_Search_Tool"]
+    assert agentflow.parse_plan(PLAN.format(topic="x", tool="Wikipedia_Search_Tool"), tools) == \
         ("The query asks about x.", "Find x.", "Wikipedia_Search_Tool")
-    assert agentflow.parse_plan(PLAN.format(topic="x", tool="base generator tool"))[2] == "Base_Generator_Tool"
-    assert agentflow.parse_plan(PLAN.format(topic="x", tool="Google_Search_Tool"))[2] is None
-    assert agentflow.parse_plan(PLAN.format(topic="x", tool="wikipedia_search"))[2] == "Wikipedia_Search_Tool"
-    assert agentflow.parse_plan(PLAN.format(topic="x", tool="Tool"))[2] is None
-    assert agentflow.parse_plan(PLAN.format(topic="x", tool="Wikipedia"))[2] == "Wikipedia_Search_Tool"
-    assert agentflow.parse_plan("no structure at all") == ("", "", None)
+    assert agentflow.parse_plan(PLAN.format(topic="x", tool="base generator tool"), tools)[2] == "Base_Generator_Tool"
+    assert agentflow.parse_plan(PLAN.format(topic="x", tool="Google_Search_Tool"), tools)[2] is None
+    assert agentflow.parse_plan(PLAN.format(topic="x", tool="Google Search"), tools + ["Google_Search_Tool"])[2] == \
+        "Google_Search_Tool"
+    assert agentflow.parse_plan(PLAN.format(topic="x", tool="wikipedia_search"), tools)[2] == "Wikipedia_Search_Tool"
+    assert agentflow.parse_plan(PLAN.format(topic="x", tool="Tool"), tools)[2] is None
+    assert agentflow.parse_plan(PLAN.format(topic="x", tool="Wikipedia"), tools)[2] == "Wikipedia_Search_Tool"
+    assert agentflow.parse_plan("no structure at all", tools) == ("", "", None)
 
 
 @pytest.mark.parametrize("command,query", [
@@ -110,6 +114,61 @@ def test_verifier_conclusion_ignores_case():
 def test_unknown_tool_and_bad_command_become_error_results():
     results = agentflow.run_tools(None, None, agentflow.LocalWikipedia(FakeRetriever()), [(None, "x"), ("Wikipedia_Search_Tool", "search it")])
     assert results[0].startswith("Error:") and results[1].startswith("Error:")
+
+
+class FakeGoogle:
+    metadata = google_search.METADATA
+
+    def __init__(self):
+        self.queries = []
+
+    def run(self, queries):
+        self.queries += queries
+        return [f"web answer to {q}" for q in queries]
+
+
+def test_google_search_tool_is_offered_and_called_only_when_given():
+    wiki, google = agentflow.LocalWikipedia(FakeRetriever()), FakeGoogle()
+    calls = [("Google_Search_Tool", 'execution = tool.execute(query="founding year")'),
+             ("Wikipedia_Search_Tool", 'execution = tool.execute(query="Citibank")')]
+    assert agentflow.run_tools(None, None, wiki, calls)[0].startswith("Error:")
+    results = agentflow.run_tools(None, None, wiki, calls, google)
+    assert results[0] == "web answer to founding year" and "text about Citibank" in results[1]
+    assert google.queries == ["founding year"]
+    llm, prompts = ScriptedLLM(), []
+    generate = llm.generate
+    llm.generate = lambda ps, *args, **kwargs: (prompts.extend(ps), generate(ps, *args, **kwargs))[1]
+    tokenizer = SimpleNamespace(apply_chat_template=lambda m, **kw: "\n".join(x["content"] for x in m))
+    agentflow.solve(llm, tokenizer, wiki, ["Question A"], 1, 0.7, google=google)
+    assert "['Base_Generator_Tool', 'Google_Search_Tool', 'Wikipedia_Search_Tool']" in prompts[0]
+    assert "Gemini" in prompts[0]
+    prompts.clear()
+    agentflow.solve(llm, tokenizer, wiki, ["Question A"], 1, 0.7)
+    assert "['Base_Generator_Tool', 'Wikipedia_Search_Tool']" in prompts[0] and "Gemini" not in prompts[0]
+
+
+def test_google_search_asks_deepseek_with_web_search_and_cites_like_the_official_tool(monkeypatch):
+    requests = []
+    cited = lambda url, end: SimpleNamespace(type="url_citation", url_citation=SimpleNamespace(url=url, end_index=end))
+    text = "Paris is the capital. It is in France."  # the two sentences end at 21 and 38
+
+    class Client:
+        def __init__(self, **kwargs):
+            self.chat = SimpleNamespace(completions=SimpleNamespace(create=self.create))
+
+        def create(self, **kwargs):
+            requests.append(kwargs)
+            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(
+                content=text, annotations=[cited("u1", 21), cited("u2", 21), cited("u1", 38)]))])
+
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "test")
+    monkeypatch.setattr(google_search, "OpenAI", Client)
+    assert google_search.DeepSeekSearch().run(["capital of France?"]) == \
+        ["Paris is the capital.[1](u1), [2](u2) It is in France.[1](u1)"]
+    assert requests == [{"model": "deepseek-flash", "messages": [{"role": "user", "content": "capital of France?"}],
+                         "tools": [{"type": "deepseek_web_search"}],
+                         "extra_body": {"thinking": {"type": "disabled"}}}]
+    assert google_search.cite("no sources", None) == "no sources"
 
 
 def test_judge_reads_the_verdict_and_asks_once_per_answer(monkeypatch):
