@@ -46,9 +46,9 @@ standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact matc
 - **AgentFlow** is 15 points below the paper because its search tool is not the paper's: the official
   Bamboogle setup's "Google Search" is Gemini 2.5 Flash answering with Google grounding, ours is
   Search-R1's top-3 passages from the 2018 Wikipedia dump. Our teammates' independent TRL
-  implementation with the same retriever gets 41–43 % (judged by Qwen2.5-7B-Instruct). With a Google
-  Search tool (DeepSeek's web search standing in for Gemini, end of this section) the same untrained
-  system gets 65.1, 6.7 points above the paper.
+  implementation with the same retriever gets 41–43 % (judged by Qwen2.5-7B-Instruct). With live
+  Wikipedia and a Google Search tool (DeepSeek's web search standing in for Gemini, end of this section)
+  untrained AgentFlow gets 65.1, 6.7 points above the paper.
 - **Flow-GRPO** did not measurably improve AgentFlow within 100 steps. Paired by question against the
   untrained system, steps 30 / 60 / 90 are +2.4 / +3.2 / +0.5 points, every 95 % bootstrap interval
   includes 0 (step 60: −2.1 to +8.8). The training reward stayed flat (about 0.59) while the planner

@@ -34,9 +34,8 @@ def cite(text, annotations):
     spans = [a.url_citation for a in annotations or [] if a.type == "url_citation"]
     number, ends = {}, {}
     for s in spans:
-        number.setdefault(s.url, len(number) + 1)
-    for s in spans:
-        ends.setdefault(s.end_index, []).append(f"[{number[s.url]}]({s.url})")
+        n = number.setdefault(s.url, len(number) + 1)
+        ends.setdefault(s.end_index, []).append(f"[{n}]({s.url})")
     for end in sorted(ends, reverse=True):
         text = text[:end] + ", ".join(ends[end]) + text[end:]
     return text
@@ -46,8 +45,7 @@ class DeepSeekSearch:
     metadata = METADATA
 
     def __init__(self, workers=32, model="deepseek-flash"):
-        self.client = OpenAI(base_url="https://api.deepseek.com", api_key=os.environ["DEEPSEEK_API_KEY"],
-                             timeout=300, max_retries=20)
+        self.client = OpenAI(base_url="https://api.deepseek.com", api_key=os.environ["DEEPSEEK_API_KEY"])
         self.workers, self.model = workers, model
 
     def search(self, query):
