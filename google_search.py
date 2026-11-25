@@ -44,8 +44,11 @@ def cite(text, annotations):
 class DeepSeekSearch:
     metadata = METADATA
 
-    def __init__(self, workers=32, model="deepseek-flash"):
-        self.client = OpenAI(base_url="https://api.deepseek.com", api_key=os.environ["DEEPSEEK_API_KEY"])
+    def __init__(self, workers=16, model="deepseek-flash"):
+        # DeepSeek limits concurrent requests by the account's remaining balance (24 at a low balance: 32 workers
+        # got HTTP 429 and stopped a training run), so fewer workers, and retries for the 429s near the limit.
+        self.client = OpenAI(base_url="https://api.deepseek.com", api_key=os.environ["DEEPSEEK_API_KEY"],
+                             max_retries=10)
         self.workers, self.model = workers, model
 
     def search(self, query):
