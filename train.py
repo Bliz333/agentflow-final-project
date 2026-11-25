@@ -29,6 +29,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import agentflow
 from evaluate import search_tool
+from google_search import DeepSeekSearch
 
 MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
 
@@ -86,6 +87,8 @@ def main():
     parser.add_argument("--data", default="data/nq_hotpotqa_train/train.parquet")
     parser.add_argument("--search", choices=["local", "wikipedia"], default="local",
                         help="Wikipedia_Search_Tool: Search-R1's local retriever or the official tool on live Wikipedia")
+    parser.add_argument("--google-search", action="store_true",
+                        help="add the official Google_Search_Tool, answered by DeepSeek's web search (DEEPSEEK_API_KEY)")
     parser.add_argument("--retrieval", default="data/retrieval")
     parser.add_argument("--steps", type=int, default=200)
     parser.add_argument("--questions", type=int, default=32, help="questions per step (AgentFlow: 32)")
@@ -130,6 +133,7 @@ def main():
         start = state["step"]
         print(f"resuming from {checkpoint} (step {start})", flush=True)
     wikipedia = search_tool(args)  # before vLLM, which then takes its share of the GPU
+    google = DeepSeekSearch() if args.google_search else None
     llm = LLM(args.model, dtype="bfloat16", max_model_len=32768, gpu_memory_utilization=args.vllm_mem,
               seed=args.seed, enable_lora=True, max_lora_rank=16, logprobs_mode="processed_logprobs")
     questions = load_questions(args.data, args.seed)
@@ -142,7 +146,7 @@ def main():
         prompts = [f"{q.strip()} {agentflow.ANSWER_FORMAT}" for q, _ in batch for _ in range(args.group)]
         episodes = agentflow.solve(llm, tokenizer, wikipedia, prompts, args.max_steps, args.temperature,
                                    LoRARequest(f"step_{step}", step + 1, str(live)),
-                                   module_temperature=args.module_temperature)
+                                   module_temperature=args.module_temperature, google=google)
         t1 = time.time()
         rewards = [agentflow.cover_match(agentflow.final_answer(ep.output), g)
                    for ep, (_, g) in zip(episodes, [b for b in batch for _ in range(args.group)])]
