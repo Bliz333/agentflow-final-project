@@ -163,8 +163,8 @@ def test_google_search_asks_deepseek_with_web_search_and_cites_like_the_official
 
     monkeypatch.setenv("DEEPSEEK_API_KEY", "test")
     monkeypatch.setattr(google_search, "OpenAI", Client)
-    assert google_search.DeepSeekSearch().run(["capital of France?"]) == \
-        ["Paris is the capital.[1](u1), [2](u2) It is in France.[1](u1)"]
+    assert google_search.DeepSeekSearch().run(["capital of France?", "capital of France?"]) == \
+        ["Paris is the capital.[1](u1), [2](u2) It is in France.[1](u1)"] * 2
     assert requests == [{"model": "deepseek-flash", "messages": [{"role": "user", "content": "capital of France?"}],
                          "tools": [{"type": "deepseek_web_search"}],
                          "extra_body": {"thinking": {"type": "disabled"}}}]

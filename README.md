@@ -1,8 +1,8 @@
 # AgentFlow + Flow-GRPO with LoRA (Qwen2.5-7B-Instruct) — INFO 7375 final project
 
 **Team**: Tianyue Gao, Shizhao Han, Shancheng Mi, Hoi Shan Tang. Team repository:
-[Bliz333/agentflow-final-project](https://github.com/Bliz333/agentflow-final-project) (private); the
-course submission is a copy of it in the course repository's `week_09/`.
+[Bliz333/agentflow-final-project](https://github.com/Bliz333/agentflow-final-project) (public; submitted on
+Canvas by its link).
 
 ## Part 1 — Bamboogle
 
@@ -20,7 +20,7 @@ and *AgentFlow w/ Flow-GRPO*, training the planner with **LoRA** instead of full
 | [`wikipedia.py`](wikipedia.py) | The official Wikipedia_Search_Tool on live Wikipedia (`--search wikipedia`, section 1) |
 | [`google_search.py`](google_search.py) | The official Google_Search_Tool with DeepSeek's web search in place of Gemini (`--google-search`, section 1) |
 | [`diagnose.py`](diagnose.py) | Where the reward differences within a group come from (section 1) |
-| [`modal_app.py`](modal_app.py) | Runs `evaluate.py` on one Modal GPU |
+| [`modal_app.py`](modal_app.py) | Runs `evaluate.py` and `train.py` on one Modal GPU, and prepares their data there |
 | [`results/`](results/) | Evaluation results (without the per-question memory, 5 MB each) and training metrics per step |
 | [`test_agentflow.py`](test_agentflow.py) | Tests without a GPU model: the loop with a scripted LLM, parsers, judge, the Flow-GRPO update on a tiny random model, checkpoints |
 | [`cluster/`](cluster/) | Slurm scripts for the NEU Explorer cluster (1-hour links that resume from the last step) |
@@ -30,20 +30,45 @@ and *AgentFlow w/ Flow-GRPO*, training the planner with **LoRA** instead of full
 Bamboogle, 125 questions. **Accuracy** is the official judge prompt run by DeepSeek V4.1 Flash, mean ±
 standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact match (EM) in brackets.
 
+With the paper's tools except `Python_Coder_Tool` (`Base_Generator_Tool`, `Google_Search_Tool`,
+`Wikipedia_Search_Tool`), in training and evaluation alike. Google Search is DeepSeek's web search in place of Gemini 2.5 Flash with Google
+grounding, which is retired (end of this section); Wikipedia is Search-R1's local retriever over the 2018
+dump:
+
 | | paper | this replication |
 |---|---|---|
 | Qwen-2.5-7B-Instruct (no tools) | 12.0 | 18.4 [EM 10.4] |
-| AgentFlow, untrained | 58.4 | **43.7 ± 2.0** [EM 14.7] |
-| (AgentFlow, untrained, with the paper's Google Search tool, below) | 58.4 | **65.1 ± 2.9** [EM 19.2] |
-| (AgentFlow, untrained, only the planner sampling) | | 45.3 ± 2.0 [EM 20.8] |
-| AgentFlow w/ Flow-GRPO (LoRA), step 30 / 60 / 90 | 69.6 | 46.1 ± 1.0 / **46.9 ± 1.4** / 44.3 ± 1.6 [EM 14.9 / 17.9 / 15.5] |
-| (Flow-GRPO with the frozen modules greedy in training, step 60) | | 44.5 ± 3.1 [EM 16.8] |
-| (same with 96 questions per step, step 30 / 60) | | 46.7 ± 2.6 / 45.3 ± 1.4 [EM 17.6 / 15.5] |
+| AgentFlow, untrained | 58.4 | **68.0 ± 1.7** [EM 22.1] |
+| AgentFlow w/ Flow-GRPO (LoRA), step 30 | 69.6 | **71.2 ± 3.0** [EM 26.1] |
 
 - **Qwen-2.5-7B-Instruct**: the paper's 12.0 is Search-R1's exact-match number for this prompt; our
   exact match is 10.4 (13 of 125 against 15). The judge also accepts answers like "1837" for
   "20 June 1837", hence 18.4.
-- **AgentFlow** is 15 points below the paper because its search tool is not the paper's: the official
+- **AgentFlow** is 9.6 points above the paper (`results/agentflow_google_local.json`); possible reasons, not
+  tested: DeepSeek V4.1 Flash with its web search may be a stronger tool than Gemini 2.5 Flash was, and
+  the judge is DeepSeek instead of GPT-4o.
+- **Flow-GRPO** (`results/flow_grpo_google_step_0030.json`, run `flow_grpo_google`): +3.2 points paired by
+  question (95 % bootstrap interval −1.9 to +8.3; 35 questions better, 22 worse), EM +4.0. The paper
+  gains 11.2 from a lower start. The training reward stayed level (0.66 / 0.67 / 0.64 over steps 1–10 /
+  11–20 / 21–30) while the planner moved from the base model (KL 0.15 per token at step 30); the trained
+  planner calls Wikipedia more (505 instead of 286 calls over the 3 trials) and takes more turns (2.4
+  instead of 1.9). Training stopped at 30 steps because of the search cost (steps 21–30 and the step-30
+  evaluation together cost ¥8.2 of DeepSeek tokens at off-peak prices). Steps 1–20 ran on Explorer, 21–30
+  on Modal (both one H200, same data). From step 20 on, rollouts of a step that send the same query share
+  one search (steps 1–19 searched every query; the untrained evaluation too), to save tokens.
+
+**Without the Google Search tool** (our first setup: `Base_Generator_Tool` and the local
+`Wikipedia_Search_Tool` only):
+
+| | paper | this replication |
+|---|---|---|
+| AgentFlow, untrained | 58.4 | 43.7 ± 2.0 [EM 14.7] |
+| (AgentFlow, untrained, only the planner sampling) | | 45.3 ± 2.0 [EM 20.8] |
+| AgentFlow w/ Flow-GRPO (LoRA), step 30 / 60 / 90 | 69.6 | 46.1 ± 1.0 / 46.9 ± 1.4 / 44.3 ± 1.6 [EM 14.9 / 17.9 / 15.5] |
+| (Flow-GRPO with the frozen modules greedy in training, step 60) | | 44.5 ± 3.1 [EM 16.8] |
+| (same with 96 questions per step, step 30 / 60) | | 46.7 ± 2.6 / 45.3 ± 1.4 [EM 17.6 / 15.5] |
+
+- **AgentFlow** is then 15 points below the paper because its search tool is not the paper's: the official
   Bamboogle setup's "Google Search" is Gemini 2.5 Flash answering with Google grounding, ours is
   Search-R1's top-3 passages from the 2018 Wikipedia dump. Our teammates' independent TRL
   implementation with the same retriever gets 41–43 % (judged by Qwen2.5-7B-Instruct). With live
@@ -61,7 +86,8 @@ standard deviation over 3 trials (temperature 0.7, at most 10 turns); exact matc
 
 | Run (`results/metrics/`) | Setting | Steps |
 |---|---|---|
-| `flow_grpo_lr1e-4` | the reported run: every module at 0.7, learning rate 1e-4 | 101 |
+| `flow_grpo_google` | the main run, with Google Search: every module at 0.7, learning rate 1e-4 | 30 |
+| `flow_grpo_lr1e-4` | without Google Search: every module at 0.7, learning rate 1e-4 | 101 |
 | `flow_grpo_lr3e-5` | learning rate 3e-5, stopped when its rewards matched the 1e-4 run | 37 |
 | `flow_grpo_lr1e-4_greedy` | frozen modules greedy (`--module-temperature 0`) | 75 |
 | `flow_grpo_greedy_q96` | frozen modules greedy, 96 questions per step | 72 |
@@ -133,7 +159,7 @@ official tool description). Untrained AgentFlow with both search tools
 - So the paper's numbers rest mostly on this tool: a strong model searching the web answers most of
   Bamboogle's two-hop questions in one call. Without it the planner had little to choose (98 % of its
   calls went to Wikipedia); with it, which tool to call and what to ask become real choices, the ones
-  Flow-GRPO trains. Flow-GRPO training with this tool has not been run.
+  Flow-GRPO trains. Flow-GRPO with this tool: the first table of this section.
 
 ## 2. Setup
 
@@ -154,7 +180,8 @@ training and 10 in evaluation, the official judge prompt, 3 evaluation trials.
   OpenAI embeddings and gpt-4o-mini; those need paid API keys, and a local search engine keeps
   training fast and repeatable. This is the main reason the absolute numbers are lower than the paper's.
   `--google-search` adds `Google_Search_Tool` with DeepSeek's web search in place of Gemini 2.5 Flash,
-  which is retired; only the evaluation in section 1 uses it, training does not.
+  which is retired; the main results train and evaluate with it. The official tool set's
+  `Python_Coder_Tool` is left out: Bamboogle's questions are fact lookups.
 - **Judge**: evaluation uses the official judge prompt with DeepSeek V4.1 Flash instead of GPT-4o;
   exact match is reported next to it. The **training reward** is not an LLM judge but FlashRAG's
   accuracy rule on whole words (a golden answer appears in the final answer): the DeepSeek API answers only about 40
@@ -204,15 +231,21 @@ OpenAI-compatible API works by changing `JUDGE_URL` / `JUDGE_MODEL` in `agentflo
 (code = this repository, `code/data` a link to `../data`); set your Slurm account (`-A`) in
 `cluster/*.sbatch`.
 
-On Modal (one H100; the 16-minute live-Wikipedia evaluation cost about $1.1, the 12-minute one with
-Google Search about $0.9 plus well under $1 of DeepSeek tokens, about 2–3k per search; the judge key, and
-for `--google-search` the DeepSeek key, must be in the environment, e.g.
-`set -a; . ~/.config/info7375/judge.env; . ~/.config/info7375/deepseek.env; set +a`):
+On Modal (an H100 for evaluation, an H200 for training; the 16-minute live-Wikipedia evaluation cost
+about $1.1). The judge key, and for `--google-search` the DeepSeek key, must be in the environment, e.g.
+`set -a; . ~/.config/info7375/judge.env; . ~/.config/info7375/deepseek.env; set +a`. Google Search costs
+about 5k DeepSeek tokens per search (about ¥5 per 1,000 off-peak, twice that in Beijing's working hours;
+in training, a step makes about 260 calls, fewer after repeated queries are merged); DeepSeek lowers the
+allowed concurrency when the balance is low:
 
 ```bash
 modal run modal_app.py::check                     # CPU only: build the image, run the tests
+modal run modal_app.py::prep                      # CPU only, once (10 minutes): retrieval data, training questions
 modal run modal_app.py --args "--mode agentflow --search wikipedia --vllm-mem 0.85" --out results/agentflow_live_wikipedia.json
 modal run modal_app.py --args "--mode agentflow --search wikipedia --google-search" --out results/agentflow_google_search.json
+modal run modal_app.py::train --args "--out /runs/flow_grpo_google --resume --steps 30 --google-search"
+modal run modal_app.py --args "--mode agentflow --google-search --retrieval /data/retrieval \
+  --adapter /runs/flow_grpo_google/adapters/step_0030" --out results/flow_grpo_google_step_0030.json
 ```
 
 ```bash
@@ -220,6 +253,7 @@ W=/scratch/$USER/info7375-w9
 sbatch -J eval cluster/eval.sbatch --mode direct --out $W/results/direct.json
 sbatch -J eval cluster/eval.sbatch --mode agentflow --out $W/results/agentflow.json
 sbatch -J flow_grpo cluster/train.sbatch --steps 200 --lr 1e-4   # a chain of 1-hour links
+sbatch -J flow_grpo_google cluster/train.sbatch --steps 30 --lr 1e-4 --google-search
 sbatch -J flow_grpo_greedy cluster/train.sbatch --steps 200 --lr 1e-4 --module-temperature 0
 sbatch -J eval cluster/eval.sbatch --mode agentflow --adapter $W/runs/flow_grpo/adapters/step_XXXX \
   --out $W/results/flow_grpo.json

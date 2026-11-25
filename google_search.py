@@ -44,8 +44,11 @@ def cite(text, annotations):
 class DeepSeekSearch:
     metadata = METADATA
 
-    def __init__(self, workers=32, model="deepseek-flash"):
-        self.client = OpenAI(base_url="https://api.deepseek.com", api_key=os.environ["DEEPSEEK_API_KEY"])
+    def __init__(self, workers=16, model="deepseek-flash"):
+        # DeepSeek limits concurrent requests by the account's remaining balance (24 at a low balance: 32 workers
+        # got HTTP 429 and stopped a training run), so fewer workers, and retries for the 429s near the limit.
+        self.client = OpenAI(base_url="https://api.deepseek.com", api_key=os.environ["DEEPSEEK_API_KEY"],
+                             max_retries=10)
         self.workers, self.model = workers, model
 
     def search(self, query):
@@ -56,5 +59,9 @@ class DeepSeekSearch:
         return cite(message.content or "", message.annotations)
 
     def run(self, queries):
+        """One search per distinct query of the batch: in training, the 8 rollouts of a question often send the
+        same query in the same turn, and each search costs about 5k tokens of search results."""
+        distinct = list(dict.fromkeys(queries))
         with ThreadPoolExecutor(self.workers) as pool:
-            return list(pool.map(self.search, queries))
+            answers = dict(zip(distinct, pool.map(self.search, distinct)))
+        return [answers[q] for q in queries]
