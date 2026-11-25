@@ -13,6 +13,7 @@ import statistics
 
 import agentflow
 import train
+from evaluate import search_tool
 
 
 def main():
@@ -20,16 +21,16 @@ def main():
     parser.add_argument("--adapter", required=True)
     parser.add_argument("--out", required=True)
     parser.add_argument("--data", default="data/nq_hotpotqa_train/train.parquet")
+    parser.add_argument("--search", choices=["local", "wikipedia"], default="local")
     parser.add_argument("--retrieval", default="data/retrieval")
     args = parser.parse_args()
 
     from transformers import AutoTokenizer
     from vllm import LLM
     from vllm.lora.request import LoRARequest
-    from retriever import Retriever
 
     tokenizer = AutoTokenizer.from_pretrained(train.MODEL_ID)
-    retriever = Retriever(args.retrieval)
+    wikipedia = search_tool(args)
     llm = LLM(train.MODEL_ID, dtype="bfloat16", max_model_len=32768, gpu_memory_utilization=0.45, seed=1,
               enable_lora=True, max_lora_rank=16)
     questions = train.load_questions(args.data, 0)[20000:20064]  # far past what any run has trained on
@@ -39,7 +40,7 @@ def main():
     out = {}
     for name, planner, others, lora in [("A", .7, .7, None), ("B", .7, 0, None), ("C", 0, .7, None),
                                         ("D", .7, .7, adapter)]:
-        episodes = agentflow.solve(llm, tokenizer, retriever, prompts, 3, planner, lora, module_temperature=others)
+        episodes = agentflow.solve(llm, tokenizer, wikipedia, prompts, 3, planner, lora, module_temperature=others)
         rewards = [agentflow.cover_match(agentflow.final_answer(ep.output), g) for ep, g in zip(episodes, golden)]
         groups = [rewards[i:i + 8] for i in range(0, len(rewards), 8)]
         firsts = [[ep.memory.get("Action Step 1", {}) for ep in episodes[i:i + 8]] for i in range(0, len(episodes), 8)]

@@ -17,7 +17,9 @@ and *AgentFlow w/ Flow-GRPO*, training the planner with **LoRA** instead of full
 | [`evaluate.py`](evaluate.py) | Bamboogle: `direct` (the base model alone) and `agentflow` (untrained or with an adapter, 3 trials) |
 | [`retriever.py`](retriever.py) | Search-R1's E5 search over the 2018 Wikipedia dump (from our Search-R1 replication) |
 | [`prep_index.py`](prep_index.py) | Builds `data/retrieval` from the files Search-R1 publishes (run once) |
+| [`wikipedia.py`](wikipedia.py) | The official Wikipedia_Search_Tool on live Wikipedia (`--search wikipedia`, section 1) |
 | [`diagnose.py`](diagnose.py) | Where the reward differences within a group come from (section 1) |
+| [`modal_app.py`](modal_app.py) | Runs `evaluate.py` on one Modal GPU |
 | [`results/`](results/) | Evaluation results (without the per-question memory, 5 MB each) and training metrics per step |
 | [`test_agentflow.py`](test_agentflow.py) | Tests without a GPU model: the loop with a scripted LLM, parsers, judge, the Flow-GRPO update on a tiny random model, checkpoints |
 | [`cluster/`](cluster/) | Slurm scripts for the NEU Explorer cluster (1-hour links that resume from the last step) |
@@ -84,6 +86,27 @@ questions × 8 rollouts, at most 3 turns; run while the reward still matched sub
   search for 98 % of its tool calls. Choosing a tool, which in the paper's setup decides between
   Wikipedia and the Gemini-backed Google Search, leaves it little to improve here.
 
+**Is a better Wikipedia tool the missing piece? No.** `wikipedia.py` implements the official
+`Wikipedia_Search_Tool` as its code intends: Wikipedia's search (10 titles), the LLM picks up to 3 pages
+from the titles, each page is cut into 200-word chunks, the 10 chunks closest to the query (E5) are kept,
+and the LLM answers from them, all with the official prompts and Qwen2.5-7B-Instruct as the tool's LLM.
+(In the released official code the per-page step never runs: the tool's `model_string` is never set,
+creating the page tool raises, and the tool returns only titles with 100-character abstracts.) Untrained
+AgentFlow with it, on live Wikipedia (`results/agentflow_live_wikipedia.json`):
+
+| Untrained AgentFlow, Wikipedia_Search_Tool | Bamboogle accuracy | EM | turns |
+|---|---|---|---|
+| Search-R1's local retriever (2018 dump, top 3 passages) | 43.7 ± 2.0 | 14.7 | 5.5 |
+| Official tool on live Wikipedia | 44.3 ± 1.9 (45.6 / 41.6 / 45.6) | 16.8 | 2.6 |
+
+The two tools are equally accurate (paired by question +0.5 points, 95 % interval −6.4 to +7.5). The
+official tool's synthesized answer lets the verifier stop earlier (25 instead of 107 of the 375 runs use
+all 10 turns), but it does not answer more questions; 5 % of its searches find nothing, nearly all
+queries written as whole questions. (Wikimedia refuses bursts of requests with HTTP 429; a first run that
+counted refused requests as empty searches scored 39.5 and is discarded.) So the gap to the paper's 58.4
+is not the Wikipedia tool but the paper's Google Search tool, Gemini 2.5 Flash answering with Google
+grounding, a much stronger model than any module here.
+
 ## 2. Setup
 
 **As in the paper / official code** ([github.com/lupantech/AgentFlow](https://github.com/lupantech/AgentFlow)):
@@ -148,6 +171,13 @@ OpenAI-compatible API works by changing `JUDGE_URL` / `JUDGE_MODEL` in `agentflo
 **On the NEU Explorer cluster** the scripts expect `/scratch/$USER/info7375-w9/{code,data,runs,results,logs}`
 (code = this repository, `code/data` a link to `../data`); set your Slurm account (`-A`) in
 `cluster/*.sbatch`.
+
+On Modal (one H100; the 16-minute full evaluation above cost about $1.1):
+
+```bash
+modal run modal_app.py::check                     # CPU only: build the image, run the tests
+modal run modal_app.py --args "--mode agentflow --search wikipedia --vllm-mem 0.85" --out results/agentflow_live_wikipedia.json
+```
 
 ```bash
 W=/scratch/$USER/info7375-w9

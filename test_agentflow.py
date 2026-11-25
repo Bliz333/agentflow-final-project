@@ -10,6 +10,7 @@ from transformers import AutoModelForCausalLM, Qwen2Config
 
 import agentflow
 import train
+import wikipedia
 
 PLAN = """1.  **Justification:** I need a fact.
 2.  **Context:** The query asks about {topic}.
@@ -80,7 +81,7 @@ def test_solve_runs_modules_in_order_and_stops():
     llm = ScriptedLLM()
     tokenizer = SimpleNamespace(apply_chat_template=lambda m, **kw: "\n".join(x["content"] for x in m))
     lora = object()
-    episodes = agentflow.solve(llm, tokenizer, FakeRetriever(), ["Question A", "Question B"], max_steps=3,
+    episodes = agentflow.solve(llm, tokenizer, agentflow.LocalWikipedia(FakeRetriever()), ["Question A", "Question B"], max_steps=3,
                                temperature=0.7, lora_request=lora)
     a, b = episodes
     assert len(a.memory) == 1 and len(b.memory) == 3          # A stops after the verifier's STOP
@@ -97,7 +98,7 @@ def test_solve_runs_modules_in_order_and_stops():
         ("generator", False, 0.7), ("base_generator", False, 0.0)}
     assert sum(m == "verifier" for m, _, _ in llm.calls) == 2 + 1  # step 1: A and B, step 2: B
     llm.calls.clear()
-    agentflow.solve(llm, tokenizer, FakeRetriever(), ["Question A"], 3, 0.7, lora, module_temperature=0.0)
+    agentflow.solve(llm, tokenizer, agentflow.LocalWikipedia(FakeRetriever()), ["Question A"], 3, 0.7, lora, module_temperature=0.0)
     assert {(m, t) for m, _, t in llm.calls} == {("planner", 0.7), ("analysis", 0.0), ("executor", 0.0),
                                                  ("verifier", 0.0), ("generator", 0.0)}
 
@@ -107,7 +108,7 @@ def test_verifier_conclusion_ignores_case():
 
 
 def test_unknown_tool_and_bad_command_become_error_results():
-    results = agentflow.run_tools(None, None, FakeRetriever(), [(None, "x"), ("Wikipedia_Search_Tool", "search it")])
+    results = agentflow.run_tools(None, None, agentflow.LocalWikipedia(FakeRetriever()), [(None, "x"), ("Wikipedia_Search_Tool", "search it")])
     assert results[0].startswith("Error:") and results[1].startswith("Error:")
 
 
@@ -181,3 +182,61 @@ def test_checkpoints_keep_only_the_last(tmp_path):
     assert not (tmp_path / "checkpoint_0001").exists()
     assert torch.load(tmp_path / "checkpoint_0002" / "state.pt")["step"] == 2
     assert not (tmp_path / "checkpoint_0002" / "state.tmp").exists()
+
+
+def test_chunks_slide_200_words_with_20_overlap():
+    words = [f"w{i}" for i in range(400)]
+    out = wikipedia.chunks(" ".join(words))
+    assert [c.split()[0] for c in out] == ["w0", "w180", "w360"] and len(out[0].split()) == 200
+    assert wikipedia.chunks("") == [] and wikipedia.chunks("a b") == ["a b"]
+
+
+def test_live_wikipedia_picks_pages_ranks_chunks_and_summarises(monkeypatch):
+    hits = {"q1": (("Citigroup", "bank"), ("Moon", "satellite"), ("James Madison", "president")), "q2": ()}
+    pages = {"Citigroup": "Citibank was founded in 1812 " * 50, "James Madison": "fourth president " * 300,
+             "Moon": ""}
+    monkeypatch.setattr(wikipedia, "search", lambda q: hits[q])
+    monkeypatch.setattr(wikipedia, "page_text", lambda title: pages.get(title, ""))
+    tool = wikipedia.LiveWikipedia.__new__(wikipedia.LiveWikipedia)
+    tool.workers, tool.top_k = 2, 10
+    tool.embed = lambda texts, prefix: torch.nn.functional.normalize(torch.rand(len(texts), 4), dim=-1)
+    prompts = []
+
+    class LLM:
+        def generate(self, ps, params, lora_request=None, use_tqdm=False):
+            prompts.extend(ps)
+            reply = lambda p: ("- Matched Queries: Citigroup, Moon, James Madison\n- Matched Query IDs: [0, 1, 2, 7]"
+                               if "Query Candidates" in p else "Answer:\nsummary")
+            return [SimpleNamespace(outputs=[SimpleNamespace(text=reply(p))]) for p in ps]
+
+    tokenizer = SimpleNamespace(apply_chat_template=lambda m, **kw: m[-1]["content"])
+    r1, r2 = tool.run(["q1", "q2"], LLM(), tokenizer)
+    relevant = r1["relevant_pages (to the query)"]
+    assert [p["title"] for p in relevant] == ["Citigroup", "Moon", "James Madison"]  # id 7 does not exist
+    assert [p["retrieved_information"] for p in relevant] == ["Answer:\nsummary", None, "Answer:\nsummary"]
+    assert r1["other_pages (may be irrelevant to the query)"] == []
+    assert sum("Query Candidates" in p for p in prompts) == 1                # nothing to pick from for q2
+    assert r2 == {"query": "q2", "relevant_pages (to the query)": [], "other_pages (may be irrelevant to the query)": []}
+    summaries = [p for p in prompts if "### User Query" in p]
+    assert [p.count("Chunk [") for p in summaries] == [2, 4]                # all chunks when fewer than 10
+
+
+def test_wikipedia_api_waits_on_429_and_raises_on_other_errors(monkeypatch):
+    import io
+    import urllib.error
+    calls, slept = [], []
+
+    def urlopen(request, timeout):
+        calls.append(request.full_url)
+        if len(calls) == 1:
+            raise urllib.error.HTTPError(request.full_url, 429, "Too Many Requests", {"Retry-After": "2"}, None)
+        if "fail" in request.full_url:
+            raise urllib.error.HTTPError(request.full_url, 500, "Server Error", {}, None)
+        return io.BytesIO(b'{"query": {"search": [{"title": "Moon", "snippet": "<b>Moon</b> rocks"}]}}')
+
+    monkeypatch.setattr(wikipedia.urllib.request, "urlopen", urlopen)
+    monkeypatch.setattr(wikipedia.time, "sleep", slept.append)
+    assert wikipedia.api(srsearch="moon")["query"]["search"][0]["title"] == "Moon"
+    assert len(calls) == 2 and slept == [2.0]
+    with pytest.raises(urllib.error.HTTPError):
+        wikipedia.api(srsearch="fail")

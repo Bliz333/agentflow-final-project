@@ -17,7 +17,9 @@ import json
 import os
 import statistics
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from types import SimpleNamespace
 
 import agentflow
 
@@ -40,6 +42,44 @@ def load_bamboogle(cache):
             for r in rows if r and r[0].strip()]
 
 
+class ApiLLM:
+    """vLLM's LLM.generate through an OpenAI-compatible API, for the base model only (no LoRA); the prompts are
+    chat messages (see Messages)."""
+
+    def __init__(self, base_url, model, key_env, workers=16):
+        from openai import OpenAI
+        self.client = OpenAI(base_url=base_url, api_key=os.environ[key_env], timeout=300, max_retries=20)
+        self.model, self.workers = model, workers
+
+    def generate(self, prompts, params, lora_request=None, use_tqdm=False):
+        assert lora_request is None, "the API serves the base model, not a LoRA adapter"
+
+        def one(messages):
+            reply = self.client.chat.completions.create(model=self.model, messages=messages,
+                                                        temperature=params.temperature, max_tokens=params.max_tokens)
+            text = reply.choices[0].message.content or ""
+            return SimpleNamespace(prompt_token_ids=[], outputs=[SimpleNamespace(text=text, token_ids=[], logprobs=None)])
+
+        with ThreadPoolExecutor(self.workers) as pool:
+            return list(pool.map(one, prompts))
+
+
+class Messages:
+    """The tokenizer for ApiLLM: the API applies the chat template, so prompts stay chat messages."""
+
+    @staticmethod
+    def apply_chat_template(messages, **kwargs):
+        return messages
+
+
+def search_tool(args):
+    if args.search == "wikipedia":
+        from wikipedia import LiveWikipedia
+        return LiveWikipedia()
+    from retriever import Retriever
+    return agentflow.LocalWikipedia(Retriever(args.retrieval))  # 33 GB on the GPU
+
+
 def score(data, outputs):
     """One row per question: the answer, the judge's verdict and exact match."""
     answers = [agentflow.final_answer(o) for o in outputs]
@@ -54,6 +94,8 @@ def main():
     parser.add_argument("--mode", choices=["direct", "agentflow"], required=True)
     parser.add_argument("--adapter", help="Flow-GRPO LoRA adapter directory (none = untrained)")
     parser.add_argument("--out", required=True)
+    parser.add_argument("--search", choices=["local", "wikipedia"], default="local",
+                        help="Wikipedia_Search_Tool: Search-R1's local retriever or the official tool on live Wikipedia")
     parser.add_argument("--retrieval", default="data/retrieval")
     parser.add_argument("--bamboogle", default="data/bamboogle.csv")
     parser.add_argument("--trials", type=int, default=3)
@@ -62,7 +104,12 @@ def main():
     parser.add_argument("--limit", type=int, help="first N questions only (smoke tests)")
     parser.add_argument("--model", default=MODEL_ID, help="a smaller model for local smoke tests")
     parser.add_argument("--vllm-mem", type=float, help="vLLM's share of the GPU (default 0.85 direct, 0.45 agentflow)")
+    parser.add_argument("--api-base", help="run the base model through this OpenAI-compatible API instead of vLLM")
+    parser.add_argument("--api-model", default=MODEL_ID, help="the base model's name at --api-base")
+    parser.add_argument("--api-key-env", default="QWEN_API_KEY", help="environment variable with the --api-base key")
     args = parser.parse_args()
+    if args.api_base and args.adapter:
+        parser.error("--api-base serves the base model only; evaluate an adapter with vLLM")
     os.environ["OPENCODE_GO_API_KEY"]  # the judge's key: fail now, not after the GPU rollouts
 
     from transformers import AutoTokenizer
@@ -70,25 +117,25 @@ def main():
     from vllm.lora.request import LoRARequest
 
     data = load_bamboogle(args.bamboogle)[:args.limit]
-    tokenizer = AutoTokenizer.from_pretrained(args.model)
+    api = ApiLLM(args.api_base, args.api_model, args.api_key_env) if args.api_base else None
+    tokenizer = Messages() if api else AutoTokenizer.from_pretrained(args.model)
     trials = []
     if args.mode == "direct":
-        llm = LLM(args.model, dtype="bfloat16", max_model_len=4096, gpu_memory_utilization=args.vllm_mem or 0.85,
-                  seed=0)
+        llm = api or LLM(args.model, dtype="bfloat16", max_model_len=4096, gpu_memory_utilization=args.vllm_mem or 0.85,
+                         seed=0)
         prompts = [tokenizer.apply_chat_template([{"role": "system", "content": DIRECT_SYSTEM},
                                                   {"role": "user", "content": f"Question: {x['question']}"}],
                                                  tokenize=False, add_generation_prompt=True) for x in data]
         outputs = llm.generate(prompts, SamplingParams(temperature=0.0, max_tokens=512), use_tqdm=False)
         trials.append(score(data, [o.outputs[0].text for o in outputs]))
     else:
-        from retriever import Retriever
-        retriever = Retriever(args.retrieval)  # 33 GB on the GPU, before vLLM takes its share
-        llm = LLM(args.model, dtype="bfloat16", max_model_len=32768, gpu_memory_utilization=args.vllm_mem or 0.45,
-                  seed=0, enable_lora=bool(args.adapter), max_lora_rank=16)
+        wikipedia = search_tool(args)  # before vLLM, which then takes its share of the GPU
+        llm = api or LLM(args.model, dtype="bfloat16", max_model_len=32768, gpu_memory_utilization=args.vllm_mem or 0.45,
+                         seed=0, enable_lora=bool(args.adapter), max_lora_rank=16)
         lora = LoRARequest("adapter", 1, str(args.adapter)) if args.adapter else None
         questions = [f"{x['question']} {agentflow.ANSWER_FORMAT}" for x in data]
         for trial in range(args.trials):
-            episodes = agentflow.solve(llm, tokenizer, retriever, questions, args.max_steps, args.temperature, lora)
+            episodes = agentflow.solve(llm, tokenizer, wikipedia, questions, args.max_steps, args.temperature, lora)
             rows = score(data, [ep.output for ep in episodes])
             for row, ep in zip(rows, episodes):
                 row["memory"] = ep.memory
