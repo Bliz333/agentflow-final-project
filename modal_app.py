@@ -3,8 +3,8 @@
     modal run modal_app.py::check                     # CPU only: build the image, run the tests
     modal run modal_app.py --args "--mode agentflow --search wikipedia --limit 5 --trials 1" --out results/smoke.json
 
-The judge key (OPENCODE_GO_API_KEY) is read from the local environment for the run; it is not stored in the
-Modal workspace.
+Both commands need the judge key (OPENCODE_GO_API_KEY) in the local environment: it is passed to the run and
+not stored in the Modal workspace.
 """
 import shlex
 import subprocess

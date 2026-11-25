@@ -193,7 +193,8 @@ def test_chunks_slide_200_words_with_20_overlap():
 
 def test_live_wikipedia_picks_pages_ranks_chunks_and_summarises(monkeypatch):
     hits = {"q1": (("Citigroup", "bank"), ("Moon", "satellite"), ("James Madison", "president")), "q2": ()}
-    pages = {"Citigroup": "Citibank was founded in 1812 " * 50, "James Madison": "fourth president " * 300}
+    pages = {"Citigroup": "Citibank was founded in 1812 " * 50, "James Madison": "fourth president " * 300,
+             "Moon": ""}
     monkeypatch.setattr(wikipedia, "search", lambda q: hits[q])
     monkeypatch.setattr(wikipedia, "page_text", lambda title: pages.get(title, ""))
     tool = wikipedia.LiveWikipedia.__new__(wikipedia.LiveWikipedia)
@@ -204,16 +205,38 @@ def test_live_wikipedia_picks_pages_ranks_chunks_and_summarises(monkeypatch):
     class LLM:
         def generate(self, ps, params, lora_request=None, use_tqdm=False):
             prompts.extend(ps)
-            reply = lambda p: ("- Matched Queries: Citigroup, James Madison\n- Matched Query IDs: [0, 2, 7]"
+            reply = lambda p: ("- Matched Queries: Citigroup, Moon, James Madison\n- Matched Query IDs: [0, 1, 2, 7]"
                                if "Query Candidates" in p else "Answer:\nsummary")
             return [SimpleNamespace(outputs=[SimpleNamespace(text=reply(p))]) for p in ps]
 
     tokenizer = SimpleNamespace(apply_chat_template=lambda m, **kw: m[-1]["content"])
     r1, r2 = tool.run(["q1", "q2"], LLM(), tokenizer)
     relevant = r1["relevant_pages (to the query)"]
-    assert [p["title"] for p in relevant] == ["Citigroup", "James Madison"]  # id 7 does not exist
-    assert all(p["retrieved_information"] == "Answer:\nsummary" for p in relevant)
-    assert [p["title"] for p in r1["other_pages (may be irrelevant to the query)"]] == ["Moon"]
+    assert [p["title"] for p in relevant] == ["Citigroup", "Moon", "James Madison"]  # id 7 does not exist
+    assert [p["retrieved_information"] for p in relevant] == ["Answer:\nsummary", None, "Answer:\nsummary"]
+    assert r1["other_pages (may be irrelevant to the query)"] == []
+    assert sum("Query Candidates" in p for p in prompts) == 1                # nothing to pick from for q2
     assert r2 == {"query": "q2", "relevant_pages (to the query)": [], "other_pages (may be irrelevant to the query)": []}
     summaries = [p for p in prompts if "### User Query" in p]
     assert [p.count("Chunk [") for p in summaries] == [2, 4]                # all chunks when fewer than 10
+
+
+def test_wikipedia_api_waits_on_429_and_raises_on_other_errors(monkeypatch):
+    import io
+    import urllib.error
+    calls, slept = [], []
+
+    def urlopen(request, timeout):
+        calls.append(request.full_url)
+        if len(calls) == 1:
+            raise urllib.error.HTTPError(request.full_url, 429, "Too Many Requests", {"Retry-After": "2"}, None)
+        if "fail" in request.full_url:
+            raise urllib.error.HTTPError(request.full_url, 500, "Server Error", {}, None)
+        return io.BytesIO(b'{"query": {"search": [{"title": "Moon", "snippet": "<b>Moon</b> rocks"}]}}')
+
+    monkeypatch.setattr(wikipedia.urllib.request, "urlopen", urlopen)
+    monkeypatch.setattr(wikipedia.time, "sleep", slept.append)
+    assert wikipedia.api(srsearch="moon")["query"]["search"][0]["title"] == "Moon"
+    assert len(calls) == 2 and slept == [2.0]
+    with pytest.raises(urllib.error.HTTPError):
+        wikipedia.api(srsearch="fail")

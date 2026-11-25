@@ -16,6 +16,8 @@ behaviour that code intends.
 import html
 import json
 import re
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -140,27 +142,30 @@ IDS = re.compile(r"Matched Query IDs\W*\[([^\]]*)\]")
 
 
 def api(**params):
-    """One MediaWiki API call; a network error gives None, like the official tool's per-page fallback."""
+    """One MediaWiki API call. Wikimedia refuses bursts with HTTP 429 and a Retry-After; such a request waits and
+    is retried. Any other failure raises: it must not look like an empty search (it did, before this retry)."""
     url = API + "?" + urllib.parse.urlencode({**params, "format": "json", "formatversion": 2})
-    try:
-        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": USER_AGENT}), timeout=20) as r:
-            return json.load(r)
-    except OSError:
-        return None
+    for _ in range(30):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": USER_AGENT}), timeout=30) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            if e.code != 429:
+                raise
+            time.sleep(float(e.headers.get("Retry-After") or 5))
+    raise RuntimeError(f"Wikipedia kept refusing {params}")
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=100_000)
 def search(query):
     """[(title, abstract)] of Wikipedia's 10 best matches."""
-    reply = api(action="query", list="search", srsearch=query, srlimit=10)
-    hits = reply["query"]["search"] if reply and "query" in reply else []
+    hits = api(action="query", list="search", srsearch=query, srlimit=10).get("query", {}).get("search", [])
     return tuple((h["title"], html.unescape(re.sub(r"<[^>]+>", "", h.get("snippet", "")))) for h in hits)
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=20_000)
 def page_text(title):
-    reply = api(action="query", prop="extracts", explaintext=1, redirects=1, titles=title)
-    pages = reply["query"]["pages"] if reply and "query" in reply else []
+    pages = api(action="query", prop="extracts", explaintext=1, redirects=1, titles=title).get("query", {}).get("pages", [])
     return pages[0].get("extract", "") if pages else ""
 
 
@@ -205,14 +210,14 @@ class LiveWikipedia:
         from agentflow import chat, generate
         with ThreadPoolExecutor(self.workers) as pool:
             hits = list(pool.map(search, queries))
-        prompts = [chat(tokenizer, SELECT.format(query=q, candidates="\n".join(f"{i}. {t}" for i, (t, _) in
-                                                                                enumerate(h))))
-                   for q, h in zip(queries, hits)]
-        picked = []
-        for out, h in zip(generate(llm, prompts, 256), hits):
+        searched = [q for q, h in enumerate(hits) if h]
+        prompts = [chat(tokenizer, SELECT.format(query=queries[q], candidates="\n".join(
+            f"{i}. {t}" for i, (t, _) in enumerate(hits[q])))) for q in searched]
+        picked = [[] for _ in queries]
+        for q, out in zip(searched, generate(llm, prompts, 256) if prompts else []):
             ids = IDS.findall(out.outputs[0].text)
             ids = [int(i) for i in re.findall(r"\d+", ids[-1])] if ids else []
-            picked.append(list(dict.fromkeys(i for i in ids if i < len(h)))[:3])
+            picked[q] = list(dict.fromkeys(i for i in ids if i < len(hits[q])))[:3]
         jobs = [(q, h[i][0]) for q, h, ids in zip(range(len(queries)), hits, picked) for i in ids]
         with ThreadPoolExecutor(self.workers) as pool:
             texts = list(pool.map(page_text, [title for _, title in jobs]))
@@ -225,18 +230,18 @@ class LiveWikipedia:
             start += len(p)
             best = scores.topk(min(self.top_k, len(p))).indices.tolist() if p else []
             references.append("\n".join(f"Chunk [{k + 1}]\n{p[j]}" for k, j in enumerate(best)))
-        prompts = [chat(tokenizer, SUMMARIZE.format(query=queries[q], reference=ref)) for (q, _), ref in
-                   zip(jobs, references)]
+        readable = [(job, ref) for job, ref in zip(jobs, references) if ref]
+        prompts = [chat(tokenizer, SUMMARIZE.format(query=queries[q], reference=ref)) for (q, _), ref in readable]
         answers = [o.outputs[0].text for o in generate(llm, prompts, 1024)] if prompts else []
+        retrieved = {job: answer for (job, _), answer in zip(readable, answers)}
         results = [{"query": q, "relevant_pages (to the query)": [], "other_pages (may be irrelevant to the query)": []}
                    for q in queries]
-        retrieved = {(q, title): a if ref else None for (q, title), ref, a in zip(jobs, references, answers)}
         for q, (h, ids) in enumerate(zip(hits, picked)):
             for i, (title, abstract) in enumerate(h):
                 page = {"title": title, "url": url(title), "abstract": abstract}
                 if i in ids:
                     results[q]["relevant_pages (to the query)"].append({**page, "retrieved_information":
-                                                                        retrieved[q, title]})
+                                                                        retrieved.get((q, title))})
                 else:
                     results[q]["other_pages (may be irrelevant to the query)"].append(page)
         return results

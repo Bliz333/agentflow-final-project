@@ -97,14 +97,15 @@ AgentFlow with it, on live Wikipedia (`results/agentflow_live_wikipedia.json`):
 | Untrained AgentFlow, Wikipedia_Search_Tool | Bamboogle accuracy | EM | turns |
 |---|---|---|---|
 | Search-R1's local retriever (2018 dump, top 3 passages) | 43.7 ± 2.0 | 14.7 | 5.5 |
-| Official tool on live Wikipedia | 39.5 ± 0.4 (39.2 / 40.0 / 39.2) | 12.8 | 4.5 |
+| Official tool on live Wikipedia | 44.3 ± 1.9 (45.6 / 41.6 / 45.6) | 16.8 | 2.6 |
 
-Paired by question −4.3 points (95 % interval −11.7 to +3.2). From the 1,672 tool calls: the tool's LLM
-summary often turns unrelated chunks into a confident wrong answer that the planner then trusts (the last
-Hanoverian king "died in 1953", the fastest air-breathing aircraft is "mostly made of wood"); picking pages
-from titles alone goes wrong (Carl Jung for Freud's father); and 18 % of the searches find nothing, mostly
-queries written as whole questions, which Wikipedia's search cannot match. So the gap to the paper's 58.4 is not the Wikipedia tool but the paper's Google
-Search tool, Gemini 2.5 Flash answering with Google grounding, a much stronger model than any module here.
+The two tools are equally accurate (paired by question +0.5 points, 95 % interval −6.4 to +7.5). The
+official tool's synthesized answer lets the verifier stop earlier (25 instead of 107 of the 375 runs use
+all 10 turns), but it does not answer more questions; 5 % of its searches find nothing, nearly all
+queries written as whole questions. (Wikimedia refuses bursts of requests with HTTP 429; a first run that
+counted refused requests as empty searches scored 39.5 and is discarded.) So the gap to the paper's 58.4
+is not the Wikipedia tool but the paper's Google Search tool, Gemini 2.5 Flash answering with Google
+grounding, a much stronger model than any module here.
 
 ## 2. Setup
 
@@ -171,7 +172,7 @@ OpenAI-compatible API works by changing `JUDGE_URL` / `JUDGE_MODEL` in `agentflo
 (code = this repository, `code/data` a link to `../data`); set your Slurm account (`-A`) in
 `cluster/*.sbatch`.
 
-On Modal (one H100; the 16-minute full evaluation above cost about $1):
+On Modal (one H100; the 16-minute full evaluation above cost about $1.1):
 
 ```bash
 modal run modal_app.py::check                     # CPU only: build the image, run the tests
