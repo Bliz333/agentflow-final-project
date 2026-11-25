@@ -298,7 +298,7 @@ never answered correctly in 4 tries.
   for the full official name ("London Borough of Lambeth"). Some facts may also have changed since the
   dataset was built (August–September 2025).
 - **Leakage**: 4 of about 3,000 Google Search results cite the benchmark itself.
-- **Cost**: each AgentFlow evaluation took about 40 minutes of an H100. The two together used about 3,000
+- **Cost**: each AgentFlow evaluation took about 45 minutes of an H100. The two together used about 3,000
   searches and ¥25 of DeepSeek tokens.
 
 ```bash
