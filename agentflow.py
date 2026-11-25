@@ -13,10 +13,10 @@ temperature to all of them); the Base_Generator tool runs at temperature 0, as t
 do. All questions advance together: each module call is one batched vLLM generate over the questions
 that are still running.
 
-Tools: Base_Generator_Tool (the base model answers the tool query) and Wikipedia_Search_Tool, which here
-is Search-R1's E5 retriever over the 2018 Wikipedia dump (top 3 passages) instead of the official
-Wikipedia API + OpenAI-embedding RAG; the official Google_Search_Tool (Gemini 2.5 Flash with Google
-grounding) is left out. Both need API keys, and a local search engine keeps training fast and repeatable.
+Tools: Base_Generator_Tool (the base model answers the tool query) and Wikipedia_Search_Tool, either the
+official tool on live Wikipedia (wikipedia.LiveWikipedia) or Search-R1's E5 retriever over the 2018
+Wikipedia dump (LocalWikipedia, top 3 passages). The official Google_Search_Tool (Gemini 2.5 Flash with
+Google grounding) is left out: it needs a Google API key.
 """
 import os
 import re
@@ -40,7 +40,14 @@ TOOLBOX = {
         "demo_commands": [{"command": 'execution = tool.execute(query="Summarize the following text in a few lines")',
                            "description": "Generate a short summary given the query from the user."}],
     },
-    "Wikipedia_Search_Tool": {
+    "Wikipedia_Search_Tool": None,  # the search backend's metadata, see solve()
+}
+TOOLS = list(TOOLBOX)
+
+
+class LocalWikipedia:
+    """Wikipedia_Search_Tool on Search-R1's E5 retriever over the 2018 Wikipedia dump: the top 3 passages."""
+    metadata = {
         "tool_description": "A tool that searches Wikipedia and returns the 3 most relevant passages, with their "
                             "page titles, for a given query.",
         "input_types": {"query": "str - The search query for Wikipedia."},
@@ -51,9 +58,13 @@ TOOLBOX = {
             {"command": 'execution = tool.execute(query="When was the first moon landing?")',
              "description": "Search Wikipedia and get the information about the first moon landing."},
         ],
-    },
-}
-TOOLS = list(TOOLBOX)
+    }
+
+    def __init__(self, retriever):
+        self.retriever = retriever
+
+    def run(self, queries, llm, tokenizer):
+        return [format_passages(p) for p in self.retriever.search(queries)]
 
 QUERY_ANALYSIS = """
 Task: Analyze the given query to determine necessary skills and tools.
@@ -250,7 +261,7 @@ def parse_plan(text):
                                     or key and t.lower().startswith(key)), None)
 
 
-def run_tools(llm, tokenizer, retriever, calls):
+def run_tools(llm, tokenizer, wikipedia, calls):
     """Results of (tool_name, command) calls; Wikipedia searches and generator calls each run as one batch."""
     queries = [COMMAND.search(command) for _, command in calls]
     results = [f"Error: {tool!r} is not an available tool." if tool not in TOOLBOX else
@@ -260,7 +271,7 @@ def run_tools(llm, tokenizer, retriever, calls):
         if not idx:
             continue
         if name == "Wikipedia_Search_Tool":
-            outputs = [format_passages(p) for p in retriever.search([queries[i].group(2) for i in idx])]
+            outputs = wikipedia.run([queries[i].group(2) for i in idx], llm, tokenizer)
         else:
             outputs = [o.outputs[0].text for o in generate(llm, [chat(tokenizer, queries[i].group(2)) for i in idx],
                                                            1024)]
@@ -269,13 +280,14 @@ def run_tools(llm, tokenizer, retriever, calls):
     return results
 
 
-def solve(llm, tokenizer, retriever, questions, max_steps, temperature, lora_request=None, planner_tokens=2048,
+def solve(llm, tokenizer, wikipedia, questions, max_steps, temperature, lora_request=None, planner_tokens=2048,
           module_temperature=None):
     """Run AgentFlow on questions (strings, ANSWER_FORMAT already appended); one Episode per question.
 
     `temperature` is the planner's; the other modules use `module_temperature` (default: the same)."""
     module_temperature = temperature if module_temperature is None else module_temperature
-    fill = dict(tools=TOOLS, toolbox=TOOLBOX)
+    toolbox = {**TOOLBOX, "Wikipedia_Search_Tool": wikipedia.metadata}
+    fill = dict(tools=TOOLS, toolbox=toolbox)
     episodes = [Episode(q) for q in questions]
     for ep, out in zip(episodes, generate(llm, [chat(tokenizer, QUERY_ANALYSIS.format(question=q, **fill))
                                                for q in questions], 1024, module_temperature)):
@@ -293,11 +305,11 @@ def solve(llm, tokenizer, retriever, questions, max_steps, temperature, lora_req
                              [lp[t].logprob for lp, t in zip(gen.logprobs, gen.token_ids)] if gen.logprobs else None))
             plans.append(parse_plan(gen.text))
         prompts = [chat(tokenizer, TOOL_COMMAND.format(question=ep.question, sub_goal=sub_goal, tool_name=tool,
-                                                       tool_metadata=TOOLBOX.get(tool), context=context))
+                                                       tool_metadata=toolbox.get(tool), context=context))
                    for ep, (context, sub_goal, tool) in zip(active, plans)]
         commands = [o.outputs[0].text.split("Generated Command:")[-1].strip()
                     for o in generate(llm, prompts, 512, module_temperature)]
-        results = run_tools(llm, tokenizer, retriever, [(tool, c) for (_, _, tool), c in zip(plans, commands)])
+        results = run_tools(llm, tokenizer, wikipedia, [(tool, c) for (_, _, tool), c in zip(plans, commands)])
         for ep, (_, sub_goal, tool), command, result in zip(active, plans, commands, results):
             ep.memory[f"Action Step {step}"] = {"tool_name": tool, "sub_goal": sub_goal, "command": command,
                                                 "result": result}

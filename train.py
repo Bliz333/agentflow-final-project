@@ -28,6 +28,7 @@ from peft import LoraConfig, PeftModel, get_peft_model
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import agentflow
+from evaluate import search_tool
 
 MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
 
@@ -83,6 +84,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out", required=True)
     parser.add_argument("--data", default="data/nq_hotpotqa_train/train.parquet")
+    parser.add_argument("--search", choices=["local", "wikipedia"], default="local",
+                        help="Wikipedia_Search_Tool: Search-R1's local retriever or the official tool on live Wikipedia")
     parser.add_argument("--retrieval", default="data/retrieval")
     parser.add_argument("--steps", type=int, default=200)
     parser.add_argument("--questions", type=int, default=32, help="questions per step (AgentFlow: 32)")
@@ -109,7 +112,6 @@ def main():
 
     from vllm import LLM
     from vllm.lora.request import LoRARequest
-    from retriever import Retriever
 
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     model = AutoModelForCausalLM.from_pretrained(args.model, dtype=torch.bfloat16).cuda()
@@ -127,7 +129,7 @@ def main():
         optimizer.load_state_dict(state["optimizer"])
         start = state["step"]
         print(f"resuming from {checkpoint} (step {start})", flush=True)
-    retriever = Retriever(args.retrieval)  # 33 GB on the GPU, before vLLM takes its share
+    wikipedia = search_tool(args)  # before vLLM, which then takes its share of the GPU
     llm = LLM(args.model, dtype="bfloat16", max_model_len=32768, gpu_memory_utilization=args.vllm_mem,
               seed=args.seed, enable_lora=True, max_lora_rank=16, logprobs_mode="processed_logprobs")
     questions = load_questions(args.data, args.seed)
@@ -138,7 +140,7 @@ def main():
         model.save_pretrained(live)
         batch = [questions[(step * args.questions + i) % len(questions)] for i in range(args.questions)]
         prompts = [f"{q.strip()} {agentflow.ANSWER_FORMAT}" for q, _ in batch for _ in range(args.group)]
-        episodes = agentflow.solve(llm, tokenizer, retriever, prompts, args.max_steps, args.temperature,
+        episodes = agentflow.solve(llm, tokenizer, wikipedia, prompts, args.max_steps, args.temperature,
                                    LoRARequest(f"step_{step}", step + 1, str(live)),
                                    module_temperature=args.module_temperature)
         t1 = time.time()
