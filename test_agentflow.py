@@ -9,6 +9,7 @@ from peft import LoraConfig, get_peft_model
 from transformers import AutoModelForCausalLM, Qwen2Config
 
 import agentflow
+import evaluate
 import google_search
 import train
 import wikipedia
@@ -169,6 +170,13 @@ def test_google_search_asks_deepseek_with_web_search_and_cites_like_the_official
                          "tools": [{"type": "deepseek_web_search"}],
                          "extra_body": {"thinking": {"type": "disabled"}}}]
     assert google_search.cite("no sources", None) == "no sources"
+
+
+def test_livesearchbench_reads_one_answer_per_question(tmp_path):
+    cache = tmp_path / "lsb.json"
+    cache.write_text('[{"question": " In which country will ICLR 2026 be held? ", "answer": "Brazil", "level": 1}]')
+    assert evaluate.load_livesearchbench(cache) == [{"question": "In which country will ICLR 2026 be held?",
+                                                     "golden_answers": ["Brazil"]}]
 
 
 def test_judge_reads_the_verdict_and_asks_once_per_answer(monkeypatch):

@@ -1,0 +1,3018 @@
+{
+ "summary": {
+  "dataset": "livesearchbench",
+  "mode": "direct",
+  "adapter": null,
+  "n": 300,
+  "accuracy": 0.10666666666666667,
+  "accuracy_std": 0.0,
+  "trials": [
+   0.10666666666666667
+  ],
+  "em": 0.043333333333333335
+ },
+ "trials": [
+  [
+   {
+    "question": "Which borough, in its full official name, is Trinity Hospice located in?",
+    "golden_answers": [
+     "London Borough of Lambeth"
+    ],
+    "output": "Borough of Lambeth",
+    "answer": "Borough of Lambeth",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which country is Juan B\u00e1ez a citizen of?",
+    "golden_answers": [
+     "United States"
+    ],
+    "output": "Dominican Republic",
+    "answer": "Dominican Republic",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which Wikimedia project has the Ministry of Human Resources on its focus list?",
+    "golden_answers": [
+     "Govdirectory"
+    ],
+    "output": "Wikipedia",
+    "answer": "Wikipedia",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which league did soccer player Michael Collins play in?",
+    "golden_answers": [
+     "North American Soccer League"
+    ],
+    "output": "English Football League",
+    "answer": "English Football League",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which league did Les Wilson play in?",
+    "golden_answers": [
+     "North American Soccer League"
+    ],
+    "output": "English Football League",
+    "answer": "English Football League",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which league did Alberto Baeza play in?",
+    "golden_answers": [
+     "North American Soccer League"
+    ],
+    "output": "Argentine Primera Divisi\u00f3n",
+    "answer": "Argentine Primera Divisi\u00f3n",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What group was Thomas Holme part of?",
+    "golden_answers": [
+     "Valiant Sixty"
+    ],
+    "output": "Pennsylvania Colony",
+    "answer": "Pennsylvania Colony",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Was \u201cThe Long Way\u201d released on cassette, vinyl, or compact disc?",
+    "golden_answers": [
+     "compact disc"
+    ],
+    "output": "compact disc",
+    "answer": "compact disc",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "What kind of creative work is \"Fear of the Dark\"?",
+    "golden_answers": [
+     "novel"
+    ],
+    "output": "novel",
+    "answer": "novel",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "Where was Romuald Mont\u00e9zuma Gendron born?",
+    "golden_answers": [
+     "Montmorency"
+    ],
+    "output": "Montreal, Quebec, Canada",
+    "answer": "Montreal, Quebec, Canada",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where was Andrea Sisson born?",
+    "golden_answers": [
+     "Cleves"
+    ],
+    "output": "Andrea Sisson was born in Fort Huachuca, Arizona.",
+    "answer": "Andrea Sisson was born in Fort Huachuca, Arizona.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "In which city was Juan Alfonso Enr\u00edquez de Cabrera born?",
+    "golden_answers": [
+     "Medina de Rioseco"
+    ],
+    "output": "Seville",
+    "answer": "Seville",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where was Petar Kralj born?",
+    "golden_answers": [
+     "Rovi\u0161ka"
+    ],
+    "output": "Petar Kralj was born in Zagreb, Croatia.",
+    "answer": "Petar Kralj was born in Zagreb, Croatia.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which competition did Erik H\u00e5ker compete in?",
+    "golden_answers": [
+     "FIS Alpine Ski World Cup"
+    ],
+    "output": "Erik H\u00e5ker competed in the Iditarod Trail Sled Dog Race.",
+    "answer": "Erik H\u00e5ker competed in the Iditarod Trail Sled Dog Race.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who did Haruo Wak\u014d work for?",
+    "golden_answers": [
+     "Wakamatsu Production"
+    ],
+    "output": "Haruo Wak\u014d worked for Nissan Motor Company.",
+    "answer": "Haruo Wak\u014d worked for Nissan Motor Company.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What sport does Ryan Scott play?",
+    "golden_answers": [
+     "wheelchair rugby"
+    ],
+    "output": "rugby",
+    "answer": "rugby",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where did J\u00fcrgen Schornagel die?",
+    "golden_answers": [
+     "Wester-Ohrstedt"
+    ],
+    "output": "J\u00fcrgen Schornagel died in D\u00fcsseldorf, Germany.",
+    "answer": "J\u00fcrgen Schornagel died in D\u00fcsseldorf, Germany.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "In which city did Malini Fonseka die?",
+    "golden_answers": [
+     "Colombo"
+    ],
+    "output": "Colombo",
+    "answer": "Colombo",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "Where did Stere Adamache die?",
+    "golden_answers": [
+     "Cri\u0219an"
+    ],
+    "output": "Stere Adamache died in Paris, France.",
+    "answer": "Stere Adamache died in Paris, France.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where did Kurt von Priesdorff die?",
+    "golden_answers": [
+     "Naumburg"
+    ],
+    "output": "Kurt von Priesdorff died in Berlin.",
+    "answer": "Kurt von Priesdorff died in Berlin.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What's the name of Iorwerth Peate's child?",
+    "golden_answers": [
+     "Dafydd Peate"
+    ],
+    "output": "Gwilym",
+    "answer": "Gwilym",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which company operates Fukuonji Station?",
+    "golden_answers": [
+     "Iyotetsu"
+    ],
+    "output": "West Japan Railway Company (JR West)",
+    "answer": "West Japan Railway Company (JR West)",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is William Molson's sibling?",
+    "golden_answers": [
+     "John Molson Jr."
+    ],
+    "output": "Elizabeth Molson",
+    "answer": "Elizabeth Molson",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who produced the movie Virasat?",
+    "golden_answers": [
+     "Mushir Alam"
+    ],
+    "output": "The movie Virasat was produced by Baljit Rai Anand.",
+    "answer": "The movie Virasat was produced by Baljit Rai Anand.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where is Tristram Dalton buried?",
+    "golden_answers": [
+     "St. Paul's Episcopal Churchyard"
+    ],
+    "output": "Tristram Dalton is buried in the churchyard of St Mary's Church in West Wycombe, Buckinghamshire, England.",
+    "answer": "Tristram Dalton is buried in the churchyard of St Mary's Church in West Wycombe, Buckinghamshire, England.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where is L. Birge Harrison buried?",
+    "golden_answers": [
+     "Woodstock Cemetery"
+    ],
+    "output": "Woodlawn Cemetery, Bronx, New York, United States",
+    "answer": "Woodlawn Cemetery, Bronx, New York, United States",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where is Terra Santa headquartered?",
+    "golden_answers": [
+     "Nova Mutum"
+    ],
+    "output": "Vatican City",
+    "answer": "Vatican City",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which street does Walton Street connect with?",
+    "golden_answers": [
+     "Little Clarendon Street"
+    ],
+    "output": "Oxford Street",
+    "answer": "Oxford Street",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What record label released \"1992-1998\"?",
+    "golden_answers": [
+     "The Numero Group"
+    ],
+    "output": "BMG Records",
+    "answer": "BMG Records",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who owns Ushibuchi Station?",
+    "golden_answers": [
+     "Iyotetsu"
+    ],
+    "output": "JR West",
+    "answer": "JR West",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who owns Ehime University Hospital Station?",
+    "golden_answers": [
+     "Iyotetsu"
+    ],
+    "output": "Ehime Prefectural Government",
+    "answer": "Ehime Prefectural Government",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who owns WJRT-TV?",
+    "golden_answers": [
+     "Allen Media Group"
+    ],
+    "output": "WJRT-TV is owned by Journal Media Group.",
+    "answer": "WJRT-TV is owned by Journal Media Group.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who owns Masaki Station?",
+    "golden_answers": [
+     "Iyotetsu"
+    ],
+    "output": "JR East",
+    "answer": "JR East",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where did Seaborne Davies live?",
+    "golden_answers": [
+     "Pwllheli"
+    ],
+    "output": "Seaborne Davies lived in London, England.",
+    "answer": "Seaborne Davies lived in London, England.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "How would you classify Emmeline regarding diacritical marks?",
+    "golden_answers": [
+     "name without diacritical marks"
+    ],
+    "output": "Emmeline has no diacritical marks.",
+    "answer": "Emmeline has no diacritical marks.",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which political party is Marat T\u00e4jin a member of?",
+    "golden_answers": [
+     "Amanat"
+    ],
+    "output": "Ak Zhol",
+    "answer": "Ak Zhol",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What was Prince Alexander of Kartli\u2019s social class?",
+    "golden_answers": [
+     "noble"
+    ],
+    "output": "noble",
+    "answer": "noble",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "What was Shamadavle Dadiani\u2019s social class?",
+    "golden_answers": [
+     "noble"
+    ],
+    "output": "noble",
+    "answer": "noble",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "What was Vakhtang I Gurieli\u2019s social class?",
+    "golden_answers": [
+     "noble"
+    ],
+    "output": "royal",
+    "answer": "royal",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What was Demetrius the Hypatos\u2019s social class?",
+    "golden_answers": [
+     "noble"
+    ],
+    "output": "upper class",
+    "answer": "upper class",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is Dimitri Amilakhvari\u2019s social classification?",
+    "golden_answers": [
+     "noble"
+    ],
+    "output": "Dimitri Amilakhvari is classified as an ethnic Georgian.",
+    "answer": "Dimitri Amilakhvari is classified as an ethnic Georgian.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the chairperson of the French National Olympic and Sports Committee?",
+    "golden_answers": [
+     "Am\u00e9lie Oud\u00e9a-Cast\u00e9ra"
+    ],
+    "output": "Philippe Poutou",
+    "answer": "Philippe Poutou",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the chairperson of the Roman Catholic Archdiocese of Hobart?",
+    "golden_answers": [
+     "Anthony John Ireland"
+    ],
+    "output": "Monsignor Mark Moxon",
+    "answer": "Monsignor Mark Moxon",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the chairperson of the Roman Catholic Territorial Prelature of Mission de France?",
+    "golden_answers": [
+     "Dominique Blanchet"
+    ],
+    "output": "The chairperson of the Roman Catholic Territorial Prelature of Mission de France is currently Monseigneur Michel Gondard.",
+    "answer": "The chairperson of the Roman Catholic Territorial Prelature of Mission de France is currently Monseigneur Michel Gondard.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is Chaso\u0148 named after?",
+    "golden_answers": [
+     "Sun"
+    ],
+    "output": "Chaso\u0148 is named after a village in the Czech Republic.",
+    "answer": "Chaso\u0148 is named after a village in the Czech Republic.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the chairperson of the Roman Catholic Archdiocese of Mobile?",
+    "golden_answers": [
+     "Mark Steven Rivituso"
+    ],
+    "output": "Robert J. Baker",
+    "answer": "Robert J. Baker",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which electoral constituency is Bistrenci in?",
+    "golden_answers": [
+     "Constituency 4"
+    ],
+    "output": "Bistrenci is in the Kumanovo electoral constituency.",
+    "answer": "Bistrenci is in the Kumanovo electoral constituency.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which electoral constituency is \u010celevec in?",
+    "golden_answers": [
+     "Constituency 4"
+    ],
+    "output": "Kumanovo",
+    "answer": "Kumanovo",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What was Hannah Atkins\u2019s cause of death?",
+    "golden_answers": [
+     "natural causes"
+    ],
+    "output": "Hannah Atkins died from injuries sustained in a fall.",
+    "answer": "Hannah Atkins died from injuries sustained in a fall.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which mountain range is Melungtse part of?",
+    "golden_answers": [
+     "Rolwaling Himal"
+    ],
+    "output": "Himalayas",
+    "answer": "Himalayas",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "In which German city does the State Oil Company of the Azerbaijan Republic have an office?",
+    "golden_answers": [
+     "Frankfurt"
+    ],
+    "output": "Munich",
+    "answer": "Munich",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is Sanave Thomas\u2019s native language?",
+    "golden_answers": [
+     "English"
+    ],
+    "output": "English",
+    "answer": "English",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "Which Polish club did Edward Iord\u0103nescu coach?",
+    "golden_answers": [
+     "Legia Warsaw"
+    ],
+    "output": "Lech Pozna\u0144",
+    "answer": "Lech Pozna\u0144",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is Melissa Hortman married to?",
+    "golden_answers": [
+     "Mark Hortman"
+    ],
+    "output": "Adam Sandler",
+    "answer": "Adam Sandler",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What culture does Parsi cuisine belong to?",
+    "golden_answers": [
+     "Parsi culture"
+    ],
+    "output": "Parsi cuisine belongs to the culture of the Parsi people, an Indo-Iranian community primarily found in India.",
+    "answer": "Parsi cuisine belongs to the culture of the Parsi people, an Indo-Iranian community primarily found in India.",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is Shamil Qala's heritage designation?",
+    "golden_answers": [
+     "cultural heritage monument in Azerbaijan"
+    ],
+    "output": "Chechen",
+    "answer": "Chechen",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is Riverfront station\u2019s commuter rail system?",
+    "golden_answers": [
+     "WeGo Star"
+    ],
+    "output": "Northeast Corridor Line and Northeastern Commuter Rail",
+    "answer": "Northeast Corridor Line and Northeastern Commuter Rail",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who founded Isenhagen Abbey?",
+    "golden_answers": [
+     "Agnes of Landsberg"
+    ],
+    "output": "Bernhard of Braunschweig",
+    "answer": "Bernhard of Braunschweig",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "To whom did Gilbert Crispin swear allegiance?",
+    "golden_answers": [
+     "Henry I of England"
+    ],
+    "output": "King Edward III",
+    "answer": "King Edward III",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the father of Mubarak al Fadil al Mahdi?",
+    "golden_answers": [
+     "Abdallah al-Fadil al-Mahdi"
+    ],
+    "output": "Mubarak al Fadil al Mahdi's father is Ali al Mahdi.",
+    "answer": "Mubarak al Fadil al Mahdi's father is Ali al Mahdi.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who was Henri-Edgar Lavigueur's father?",
+    "golden_answers": [
+     "C\u00e9lestin Lavigueur"
+    ],
+    "output": "Henri-Edgar Lavigueur's father was Edgar-Charles Lavigueur.",
+    "answer": "Henri-Edgar Lavigueur's father was Edgar-Charles Lavigueur.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is Samuel Emile Harvey's father?",
+    "golden_answers": [
+     "Robert Harvey"
+    ],
+    "output": "Samuel Emile Harvey's father is Emile Harvey.",
+    "answer": "Samuel Emile Harvey's father is Emile Harvey.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the head coach of Panserraikos F.C.?",
+    "golden_answers": [
+     "Cristiano Bacci"
+    ],
+    "output": "Giorgos Karagkiozis",
+    "answer": "Giorgos Karagkiozis",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the head coach of the Orix Buffaloes?",
+    "golden_answers": [
+     "Mamoru Kishida"
+    ],
+    "output": "Masayuki Kondo",
+    "answer": "Masayuki Kondo",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the head coach of FC Petrolul Ploie\u0219ti?",
+    "golden_answers": [
+     "Liviu Ciobotariu"
+    ],
+    "output": "Cristian-R\u0103zvan Chivu",
+    "answer": "Cristian-R\u0103zvan Chivu",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the head coach of Gala Fairydean F.C.?",
+    "golden_answers": [
+     "Martin Scott"
+    ],
+    "output": "Graeme James",
+    "answer": "Graeme James",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who\u2019s the head coach of the Tohoku Rakuten Golden Eagles?",
+    "golden_answers": [
+     "Hajime Miki"
+    ],
+    "output": "Yoshiyuki Shimizu",
+    "answer": "Yoshiyuki Shimizu",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which connecting line serves Osborn/Central Avenue?",
+    "golden_answers": [
+     "B Line"
+    ],
+    "output": "The connecting line that serves Osborn/Central Avenue is the Valley Metro Rail light rail line.",
+    "answer": "The connecting line that serves Osborn/Central Avenue is the Valley Metro Rail light rail line.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which transit line connects Encanto Boulevard and Central Avenue?",
+    "golden_answers": [
+     "B Line"
+    ],
+    "output": "METRO\u8f7b\u8f68",
+    "answer": "METRO\u8f7b\u8f68",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which lake is located on the Black River?",
+    "golden_answers": [
+     "Black Lake"
+    ],
+    "output": "Lake Anna",
+    "answer": "Lake Anna",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who was the architect of the Michigan Boulevard Garden Apartments?",
+    "golden_answers": [
+     "Ernest Grunsfeld Jr"
+    ],
+    "output": "Henry Hobson Richardson",
+    "answer": "Henry Hobson Richardson",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who was the architect of the Buenos Aires City Legislature Palace?",
+    "golden_answers": [
+     "Eduardo Le Monnier"
+    ],
+    "output": "Vicente Traverso",
+    "answer": "Vicente Traverso",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which church is St Volodymyr's Cathedral part of?",
+    "golden_answers": [
+     "Orthodox Church of Ukraine"
+    ],
+    "output": "Ukrainian Orthodox Church",
+    "answer": "Ukrainian Orthodox Church",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who was the architect of the Government Offices on Great George Street?",
+    "golden_answers": [
+     "Henry Tanner"
+    ],
+    "output": "George Grey Norman",
+    "answer": "George Grey Norman",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who influenced John James Waterston?",
+    "golden_answers": [
+     "John Leslie"
+    ],
+    "output": "John James Waterston was influenced by James Clerk Maxwell.",
+    "answer": "John James Waterston was influenced by James Clerk Maxwell.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which musician influenced Michael Hurley?",
+    "golden_answers": [
+     "Lead Belly"
+    ],
+    "output": "David Bowie",
+    "answer": "David Bowie",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is Mohammad Pakpour\u2019s military rank?",
+    "golden_answers": [
+     "major general"
+    ],
+    "output": "Colonel",
+    "answer": "Colonel",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What company does Rodda Paint own?",
+    "golden_answers": [
+     "Miller Paint"
+    ],
+    "output": "Bunnings Warehouse",
+    "answer": "Bunnings Warehouse",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which theater chain does CJ CGV own?",
+    "golden_answers": [
+     "CGV Cinemas"
+    ],
+    "output": "CJ CGV owns CGV theater chain.",
+    "answer": "CJ CGV owns CGV theater chain.",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which island is Hope Place on?",
+    "golden_answers": [
+     "East Falkland"
+    ],
+    "output": "Barbados",
+    "answer": "Barbados",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What language is the surname \"Jena\" used in?",
+    "golden_answers": [
+     "Odia"
+    ],
+    "output": "German",
+    "answer": "German",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "In which country did the Siege of Privas take place?",
+    "golden_answers": [
+     "France"
+    ],
+    "output": "France",
+    "answer": "France",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "What country is Bancroft Middle School in?",
+    "golden_answers": [
+     "United States"
+    ],
+    "output": "United States",
+    "answer": "United States",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "Which country was Louis of Anhalt-K\u00f6then a citizen of?",
+    "golden_answers": [
+     "Germany"
+    ],
+    "output": "Prussia",
+    "answer": "Prussia",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where was Ios Teper born?",
+    "golden_answers": [
+     "Odesa"
+    ],
+    "output": "Vienna",
+    "answer": "Vienna",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where is Alan J. Dixon buried?",
+    "golden_answers": [
+     "Lake View Memorial Gardens"
+    ],
+    "output": "Springfield, Illinois",
+    "answer": "Springfield, Illinois",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "In which historic county is Treath located?",
+    "golden_answers": [
+     "Cornwall"
+    ],
+    "output": "County Kerry",
+    "answer": "County Kerry",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is Marty Papazian married to?",
+    "golden_answers": [
+     "Marina Benedict"
+    ],
+    "output": "Marty Papazian is married to Armine Papazian.",
+    "answer": "Marty Papazian is married to Armine Papazian.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who's the head coach of Panserraikos F.C.?",
+    "golden_answers": [
+     "Cristiano Bacci"
+    ],
+    "output": "Giorgos Karagkiozis",
+    "answer": "Giorgos Karagkiozis",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What type of literature uses constrained writing?",
+    "golden_answers": [
+     "potential literature"
+    ],
+    "output": "constrained writing",
+    "answer": "constrained writing",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What sparked the Siachen conflict?",
+    "golden_answers": [
+     "Operation Meghdoot"
+    ],
+    "output": "The Siachen conflict was sparked by a dispute over the control of the Siachen Glacier, an area of strategic and symbolic importance to both India and Pakistan.",
+    "answer": "The Siachen conflict was sparked by a dispute over the control of the Siachen Glacier, an area of strategic and symbolic importance to both India and Pakistan.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who was the director of photography for \"La Prochaine fois je viserai le c\u0153ur\"?",
+    "golden_answers": [
+     "Thomas Hardmeier"
+    ],
+    "output": "G\u00e9rard Butler",
+    "answer": "G\u00e9rard Butler",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is the official color of the University of Health and Allied Sciences?",
+    "golden_answers": [
+     "white"
+    ],
+    "output": "Blue",
+    "answer": "Blue",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What type of wing configuration does the Tupolev I-4 have?",
+    "golden_answers": [
+     "sesquiplane"
+    ],
+    "output": "biplane",
+    "answer": "biplane",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the costume designer for Augustine?",
+    "golden_answers": [
+     "Pascaline Chavanne"
+    ],
+    "output": "Trina Shelton",
+    "answer": "Trina Shelton",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who was the referee for the George Foreman vs. Tommy Morrison fight?",
+    "golden_answers": [
+     "Mills Lane"
+    ],
+    "output": "Jack Carter",
+    "answer": "Jack Carter",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where was \"La pasi\u00f3n de Isabela\" filmed?",
+    "golden_answers": [
+     "Mexico City"
+    ],
+    "output": "Puerto Rico",
+    "answer": "Puerto Rico",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who commissioned Fort Carlos III?",
+    "golden_answers": [
+     "Spanish Empire"
+    ],
+    "output": "King Carlos III of Spain",
+    "answer": "King Carlos III of Spain",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the head of government in Alfauir?",
+    "golden_answers": [
+     "Jos\u00e9 Juan Bataller Rodr\u00edguez"
+    ],
+    "output": "The head of government in Alfauir is Prime Minister Ibrahim Al-Jaafar.",
+    "answer": "The head of government in Alfauir is Prime Minister Ibrahim Al-Jaafar.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is the film rating of The Ninth Circle according to FSK?",
+    "golden_answers": [
+     "FSK 12"
+    ],
+    "output": "18",
+    "answer": "18",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Is Zazpikaleak/Casco Viejo Station equipped for wheelchair access?",
+    "golden_answers": [
+     "wheelchair accessible"
+    ],
+    "output": "Yes",
+    "answer": "Yes",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where does the Little Indian Sioux River originate?",
+    "golden_answers": [
+     "Otter Lake"
+    ],
+    "output": "Custer County, South Dakota",
+    "answer": "Custer County, South Dakota",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who commissioned the St. Margarethen Chapel?",
+    "golden_answers": [
+     "Placidus Brunschwiler"
+    ],
+    "output": "Archduke Johann of Austria",
+    "answer": "Archduke Johann of Austria",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "In which military branch did Ra\u00efs Hamidou serve?",
+    "golden_answers": [
+     "Ottoman Navy"
+    ],
+    "output": "Air Force",
+    "answer": "Air Force",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is the main category of WNBA expansion draft history?",
+    "golden_answers": [
+     "Category:WNBA expansion draft"
+    ],
+    "output": "Basketball",
+    "answer": "Basketball",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where is the University of Hawai\u02bbi at M\u0101noa located?",
+    "golden_answers": [
+     "Urban Honolulu"
+    ],
+    "output": "Honolulu, Hawaii",
+    "answer": "Honolulu, Hawaii",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is credited with inventing Benedictine?",
+    "golden_answers": [
+     "Jennie C. Benedict"
+    ],
+    "output": "Benedictine was invented by the monks of the Benedictine Order, specifically by the monk Saint Benedict of Aniane. However, the specific monk credited with creating the recipe is not definitively known.",
+    "answer": "Benedictine was invented by the monks of the Benedictine Order, specifically by the monk Saint Benedict of Aniane. However, the specific monk credited with creating the recipe is not definitively known.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is the parent taxon of Monstersauria?",
+    "golden_answers": [
+     "Neoanguimorpha"
+    ],
+    "output": "Theropoda",
+    "answer": "Theropoda",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Is Klaus Raffeiner right or left-handed?",
+    "golden_answers": [
+     "right-handedness"
+    ],
+    "output": "right-handed",
+    "answer": "right-handed",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "What real animal is the bake-danuki a fictional analog of?",
+    "golden_answers": [
+     "Nyctereutes"
+    ],
+    "output": "badger",
+    "answer": "badger",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who was the production designer for French Provincial?",
+    "golden_answers": [
+     "Philippe Galland"
+    ],
+    "output": "Patricia Norris",
+    "answer": "Patricia Norris",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What type of undercarriage does the Boeing 737 Next Generation have?",
+    "golden_answers": [
+     "retractable tricycle gear"
+    ],
+    "output": "retractable tricycle",
+    "answer": "retractable tricycle",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who developed B II Sausewind?",
+    "golden_answers": [
+     "Siegfried G\u00fcnter"
+    ],
+    "output": "B II Sausewind was developed by a group of German musicians and producers, including Bernd Hollweg and Sausewind.",
+    "answer": "B II Sausewind was developed by a group of German musicians and producers, including Bernd Hollweg and Sausewind.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What artistic movement is Raffaello Sorbi associated with?",
+    "golden_answers": [
+     "Filippinism"
+    ],
+    "output": "Raffaello Sorbi is associated with the artistic movement of Neoclassicism.",
+    "answer": "Raffaello Sorbi is associated with the artistic movement of Neoclassicism.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What's the RARS rating for Despair?",
+    "golden_answers": [
+     "16+"
+    ],
+    "output": "R15+",
+    "answer": "R15+",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "When is the epoch date for 15436 Dexius?",
+    "golden_answers": [
+     "May 5 2025"
+    ],
+    "output": "1998-05-15",
+    "answer": "1998-05-15",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where was the Piaggio P.9 originally developed?",
+    "golden_answers": [
+     "Kingdom of Italy"
+    ],
+    "output": "Italy",
+    "answer": "Italy",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where did Gazi H\u00fcseyin Pasha pass away?",
+    "golden_answers": [
+     "Constantinople"
+    ],
+    "output": "Gazi H\u00fcseyin Pasha passed away in Damascus, Syria.",
+    "answer": "Gazi H\u00fcseyin Pasha passed away in Damascus, Syria.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Is Baishinji Station currently operational?",
+    "golden_answers": [
+     "in use"
+    ],
+    "output": "No",
+    "answer": "No",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who wrote the Atma Shatakam?",
+    "golden_answers": [
+     "\u0100di Shankara"
+    ],
+    "output": "Adi Shankara",
+    "answer": "Adi Shankara",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which parent organization did the 85th Landwehr Division belong to?",
+    "golden_answers": [
+     "Naval Corps"
+    ],
+    "output": "Reichswehr",
+    "answer": "Reichswehr",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who organizes the Uzbekistan Cup?",
+    "golden_answers": [
+     "Uzbekistan Professional Football League Organization"
+    ],
+    "output": "Uzbek Football Federation",
+    "answer": "Uzbek Football Federation",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is the parent taxon of Oerane?",
+    "golden_answers": [
+     "Erionotini"
+    ],
+    "output": "Oerane is not a valid taxon, so there is no parent taxon to identify.",
+    "answer": "Oerane is not a valid taxon, so there is no parent taxon to identify.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What type of undercarriage does the Bombardier CRJ100/200 have?",
+    "golden_answers": [
+     "retractable tricycle gear"
+    ],
+    "output": "retractable",
+    "answer": "retractable",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who was the film editor for Pirates?",
+    "golden_answers": [
+     "Joey Pulgadas"
+    ],
+    "output": "Richard Marks",
+    "answer": "Richard Marks",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What type of cuisine do Crozets de Savoie belong to?",
+    "golden_answers": [
+     "French cuisine"
+    ],
+    "output": "Alpine cuisine",
+    "answer": "Alpine cuisine",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Is Nicole Schaller right or left-handed?",
+    "golden_answers": [
+     "right-handedness"
+    ],
+    "output": "right-handed",
+    "answer": "right-handed",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who owns Nokian Tyres?",
+    "golden_answers": [
+     "Bridgestone"
+    ],
+    "output": "Nokian Tyres is owned by Trelleborg SE.",
+    "answer": "Nokian Tyres is owned by Trelleborg SE.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where does Jean-Guy Tr\u00e9panier live?",
+    "golden_answers": [
+     "Mont-Saint-Hilaire"
+    ],
+    "output": "Jean-Guy Tr\u00e9panier lives in Montreal, Quebec, Canada.",
+    "answer": "Jean-Guy Tr\u00e9panier lives in Montreal, Quebec, Canada.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What was the Libyan resistance movement opposing?",
+    "golden_answers": [
+     "Italian colonization of Libya"
+    ],
+    "output": "Libyan resistance movement was opposing the regime of Muammar Gaddafi.",
+    "answer": "Libyan resistance movement was opposing the regime of Muammar Gaddafi.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What religion does Nawaf Ghazaleh follow?",
+    "golden_answers": [
+     "Druzism"
+    ],
+    "output": "Islam",
+    "answer": "Islam",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What culture does the Arch of Caracalla belong to?",
+    "golden_answers": [
+     "Ancient Rome"
+    ],
+    "output": "Roman",
+    "answer": "Roman",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who was the referee for the Riddick Bowe vs. Larry Donald fight?",
+    "golden_answers": [
+     "Mills Lane"
+    ],
+    "output": "Jack Thorne",
+    "answer": "Jack Thorne",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which school district is Maui High School part of?",
+    "golden_answers": [
+     "Hawaii State Department of Education"
+    ],
+    "output": "Maui Intermediate School District",
+    "answer": "Maui Intermediate School District",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What heritage designation does the Liverpool Metropolitan Cathedral have?",
+    "golden_answers": [
+     "Grade I listed building"
+    ],
+    "output": "World Heritage Site",
+    "answer": "World Heritage Site",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who was Albertus Willem Sijthoff's business partner?",
+    "golden_answers": [
+     "P.M. Bazendijk"
+    ],
+    "output": "Cornelis Petrus Thooft",
+    "answer": "Cornelis Petrus Thooft",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What type of establishment is Pinkberry?",
+    "golden_answers": [
+     "frozen yogurt shop"
+    ],
+    "output": "ice cream shop",
+    "answer": "ice cream shop",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where was Krzysztof Szwernicki detained?",
+    "golden_answers": [
+     "Warsaw Citadel"
+    ],
+    "output": "Lviv, Ukraine",
+    "answer": "Lviv, Ukraine",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which electoral district is Vrtekica associated with?",
+    "golden_answers": [
+     "Constituency 1"
+    ],
+    "output": "Izola",
+    "answer": "Izola",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What book comes after The Dragon and the George?",
+    "golden_answers": [
+     "A Spell for Chameleon"
+    ],
+    "output": "The Elephant and the Eye",
+    "answer": "The Elephant and the Eye",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is the heritage designation of the Saint Augustin Basilica?",
+    "golden_answers": [
+     "Cultural heritage monuments in Algeria"
+    ],
+    "output": "National Historic Site",
+    "answer": "National Historic Site",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which electoral district is Bani\u0161te associated with?",
+    "golden_answers": [
+     "Constituency 5"
+    ],
+    "output": "Kraljevo",
+    "answer": "Kraljevo",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What religious order is Yothathep associated with?",
+    "golden_answers": [
+     "Mah\u0101 Nik\u0101ya"
+    ],
+    "output": "Theravada Buddhism",
+    "answer": "Theravada Buddhism",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where do the Kitchener Panthers play their home games?",
+    "golden_answers": [
+     "Kitchener Memorial Auditorium Complex"
+    ],
+    "output": "SaskTel Centre",
+    "answer": "SaskTel Centre",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What ethnic group does Michael Eric Dyson belong to?",
+    "golden_answers": [
+     "African Americans"
+    ],
+    "output": "African American",
+    "answer": "African American",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Where are Nachum Gutman's archives kept?",
+    "golden_answers": [
+     "Gnazim Institute archive"
+    ],
+    "output": "Tel Aviv University",
+    "answer": "Tel Aviv University",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What does pneumatology focus on?",
+    "golden_answers": [
+     "God the Holy Spirit"
+    ],
+    "output": "Pneumatology focuses on the study of the Holy Spirit in Christian theology.",
+    "answer": "Pneumatology focuses on the study of the Holy Spirit in Christian theology.",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which record label was associated with Siti binti Saad?",
+    "golden_answers": [
+     "Columbia Graphophone Co. Ltd."
+    ],
+    "output": "Sony Music Entertainment",
+    "answer": "Sony Music Entertainment",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who owns the OPUS card?",
+    "golden_answers": [
+     "Autorit\u00e9 r\u00e9gionale de transport m\u00e9tropolitain"
+    ],
+    "output": "OPUS cards are owned by the transit authorities in the cities where they are used, such as TransLink in Vancouver.",
+    "answer": "OPUS cards are owned by the transit authorities in the cities where they are used, such as TransLink in Vancouver.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "In which ecclesiastical territorial entity is the Notre-Dame Basilica-Cathedral located?",
+    "golden_answers": [
+     "Notre-Dame-de-Qu\u00e9bec"
+    ],
+    "output": "Archdiocese of Montreal",
+    "answer": "Archdiocese of Montreal",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which entity has the California Military Department as its parent organization and was involved in the Mexican-American War?",
+    "golden_answers": [
+     "California State Guard"
+    ],
+    "output": "California State Military Reserve",
+    "answer": "California State Military Reserve",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which artist taught both Pieter de Grebber and Pieter Jansz. Saenredam as his students?",
+    "golden_answers": [
+     "Frans Pietersz de Grebber"
+    ],
+    "output": "Jan Lievens",
+    "answer": "Jan Lievens",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which film features both Gleb Romanov and Boris Bityukov in its cast?",
+    "golden_answers": [
+     "The Young Guard"
+    ],
+    "output": "The Bear",
+    "answer": "The Bear",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What confectionery treat is made with butter and was invented by Jan Wedel?",
+    "golden_answers": [
+     "ptasie mleczko"
+    ],
+    "output": "Wedel's Karamellbonbon",
+    "answer": "Wedel's Karamellbonbon",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual has the notable work \"Mu\u1e0fakkar\u0101t Mu\u1e25ammad \u02bfIzza\u1e97 Dar\u016bza\u1e97\" and had citizenship in Mandatory Palestine?",
+    "golden_answers": [
+     "Izzat Darwaza"
+    ],
+    "output": "Muhammad Izzat Darwaza",
+    "answer": "Muhammad Izzat Darwaza",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual has Ellen Bang and Alec Campbell as relatives?",
+    "golden_answers": [
+     "Ruby Rose"
+    ],
+    "output": "Jesper Bang",
+    "answer": "Jesper Bang",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual was born in Kettering and passed away in Salisbury?",
+    "golden_answers": [
+     "Keith Roberts"
+    ],
+    "output": "Frederick Banting",
+    "answer": "Frederick Banting",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which mathematician has both Michel Laurent and Pietro Corvaja as doctoral students?",
+    "golden_answers": [
+     "Michel Waldschmidt"
+    ],
+    "output": "Enrico Bombieri",
+    "answer": "Enrico Bombieri",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual attended the University of Rochester and is known for being a songwriter?",
+    "golden_answers": [
+     "Charles Strouse"
+    ],
+    "output": "Carly Rae Jepsen",
+    "answer": "Carly Rae Jepsen",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which entity shares its borders with Munhall, Braddock, Whitaker, and Swissvale?",
+    "golden_answers": [
+     "Rankin"
+    ],
+    "output": "Pittsburgh",
+    "answer": "Pittsburgh",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which author was born in Cincinnati, has been affiliated with the University at Buffalo, and has been nominated for the Arthur C. Clarke Award?",
+    "golden_answers": [
+     "Nnedi Okorafor"
+    ],
+    "output": "James S. A. Corey",
+    "answer": "James S. A. Corey",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which person was born in Davenport, speaks English, and is a member of the Writers Guild of America West?",
+    "golden_answers": [
+     "Bryan Woods"
+    ],
+    "output": "Harper Lee",
+    "answer": "Harper Lee",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which sports player was a member of the Hunter Mariners, the South Sydney Rabbitohs, and the St. George Dragons?",
+    "golden_answers": [
+     "Nick Zisti"
+    ],
+    "output": "Wally Lewis",
+    "answer": "Wally Lewis",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which athlete was born in Frutal and is known for being a beach volleyball player?",
+    "golden_answers": [
+     "Camila Brait"
+    ],
+    "output": "Juliana Dias",
+    "answer": "Juliana Dias",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which football player has been a member of both \u0130stanbul Ba\u015fak\u015fehir F.K. and Riga FC?",
+    "golden_answers": [
+     "Milo\u0161 Joji\u0107"
+    ],
+    "output": "Davit Chkhartishvili",
+    "answer": "Davit Chkhartishvili",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What educational system includes both Los Angeles Trade\u2013Technical College and City College of San Francisco as its subsidiaries?",
+    "golden_answers": [
+     "California Community Colleges"
+    ],
+    "output": "California Community Colleges",
+    "answer": "California Community Colleges",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "Which entity shares its border with Mt. Lebanon, Upper St. Clair, and Castle Shannon?",
+    "golden_answers": [
+     "Bethel Park"
+    ],
+    "output": "Pittsburgh",
+    "answer": "Pittsburgh",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual held the position of vicar, was born in Chambly, practiced Catholicism, and was associated with Canada?",
+    "golden_answers": [
+     "Charles La Rocque"
+    ],
+    "output": "Louis-Joseph de Montcalm",
+    "answer": "Louis-Joseph de Montcalm",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual has both coached the sports teams FC Vitebsk and FC SKVICH Minsk?",
+    "golden_answers": [
+     "Sergei Borovsky"
+    ],
+    "output": "Sergei Kostyuchenko",
+    "answer": "Sergei Kostyuchenko",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual, known for both painting and illustrating, has works featured in the collection at Huis van het boek, was educated at Dumbarton Academy, and was a citizen of the United Kingdom of Great Britain and Ireland?",
+    "golden_answers": [
+     "William Strang"
+    ],
+    "output": "William Heath Robinson",
+    "answer": "William Heath Robinson",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which county shares its borders with Charlotte County, Aroostook County, and Sunbury County?",
+    "golden_answers": [
+     "York County"
+    ],
+    "output": "Piscataquis County",
+    "answer": "Piscataquis County",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which sports club is based in Kalamata, competes in volleyball, and is located in Greece?",
+    "golden_answers": [
+     "Messiniakos G.S."
+    ],
+    "output": "Olympiacos Kalamata",
+    "answer": "Olympiacos Kalamata",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which footballer has been a member of Charlton Athletic F.C., Grimsby Town F.C., and Plymouth Argyle F.C.?",
+    "golden_answers": [
+     "Billy Clarke"
+    ],
+    "output": "Chris O'Grady",
+    "answer": "Chris O'Grady",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which basketball player was born in Philadelphia, attended both Friends' Central School and William Penn Charter School, and is associated with the United States?",
+    "golden_answers": [
+     "Mustafa Shakur"
+    ],
+    "output": "Wilt Chamberlain",
+    "answer": "Wilt Chamberlain",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which entity shares a border with Ca\u00f1ada de Calatrava, Ciudad Real, and Caracuel de Calatrava?",
+    "golden_answers": [
+     "Corral de Calatrava"
+    ],
+    "output": "Albacete",
+    "answer": "Albacete",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What video game is a space-themed 4X game that uses a computer mouse for input?",
+    "golden_answers": [
+     "Master of Orion"
+    ],
+    "output": "Stellaris",
+    "answer": "Stellaris",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which entity shares a border with both Pittsburgh and Duquesne?",
+    "golden_answers": [
+     "West Mifflin"
+    ],
+    "output": "Allegheny County",
+    "answer": "Allegheny County",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What painting features Hyacinthe-Hughes Timol\u00e9on de Coss\u00e9-Brissac and the Crown of Napoleon?",
+    "golden_answers": [
+     "The Coronation of Napoleon"
+    ],
+    "output": "The painting is \"The Coronation of Napoleon\" by Jacques-Louis David.",
+    "answer": "The painting is \"The Coronation of Napoleon\" by Jacques-Louis David.",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual was born in El Reno and educated at Oklahoma State University\u2013Oklahoma City?",
+    "golden_answers": [
+     "Harvey Pratt"
+    ],
+    "output": "Dale Scott",
+    "answer": "Dale Scott",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What river has both Davy Branch and Loop Branch as its tributaries?",
+    "golden_answers": [
+     "Tug Fork"
+    ],
+    "output": "Pigeon River",
+    "answer": "Pigeon River",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual is a science fiction writer, studied at the University of Reading, has been nominated for the BSFA Award for Best Novel, works as a legal executive, and is of British nationality?",
+    "golden_answers": [
+     "Adrian Tchaikovsky"
+    ],
+    "output": "Niall Harrison",
+    "answer": "Niall Harrison",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which athlete has been a member of both the St. John's IceCaps and HC Kunlun Red Star?",
+    "golden_answers": [
+     "Victor Bartley"
+    ],
+    "output": "Petr Mrazek",
+    "answer": "Petr Mrazek",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which character has music composed by Vic Schoen and features the voice of Michael Rye?",
+    "golden_answers": [
+     "The Lone Ranger"
+    ],
+    "output": "The Price is Right",
+    "answer": "The Price is Right",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual, born in Brixton, works as a film producer, resides in Los Angeles, and holds citizenship in the United States?",
+    "golden_answers": [
+     "Sharon Osbourne"
+    ],
+    "output": "Emma Thomas",
+    "answer": "Emma Thomas",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which company is owned by both Clearbit and Mindstream?",
+    "golden_answers": [
+     "HubSpot"
+    ],
+    "output": "Salesforce",
+    "answer": "Salesforce",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which county shares a border with Queens County, Charlotte County, and Westmorland County?",
+    "golden_answers": [
+     "Kings County"
+    ],
+    "output": "York County",
+    "answer": "York County",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What children's television series has English as its original language and features John Megna as a voice actor?",
+    "golden_answers": [
+     "The Big World of Little Adam"
+    ],
+    "output": "Sesame Street",
+    "answer": "Sesame Street",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What award includes both the P.C. Hooft-prijs 2023 and the P.C. Hooft-prijs 2024?",
+    "golden_answers": [
+     "P.C. Hooft Award"
+    ],
+    "output": "Nobel Prize",
+    "answer": "Nobel Prize",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which person is known for their work in scenography and is buried in Sukhumi?",
+    "golden_answers": [
+     "Alexander Shervashidze"
+    ],
+    "output": "Nino Ananiashvili",
+    "answer": "Nino Ananiashvili",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which station is located adjacent to both Capital Beltway station and Washington Union Station?",
+    "golden_answers": [
+     "New Carrollton station"
+    ],
+    "output": "Penn Station",
+    "answer": "Penn Station",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What individual is a teacher who studied at Jarvis Collegiate Institute, is originally from Canada, and passed away in Lindsay?",
+    "golden_answers": [
+     "Sam Hughes"
+    ],
+    "output": "Erin Mills",
+    "answer": "Erin Mills",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which entity shares its borders with Wilkinsburg, Wilkins Township, and Pittsburgh?",
+    "golden_answers": [
+     "Penn Hills"
+    ],
+    "output": "Allegheny County",
+    "answer": "Allegheny County",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which entity is right-handed, plays with the right hand, and was born in Melito di Porto Salvo?",
+    "golden_answers": [
+     "Klaus Raffeiner"
+    ],
+    "output": "Sandro Veroni",
+    "answer": "Sandro Veroni",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What album includes the tracklist \"Pretty When You Cry\" and features the track \"The Other Woman\"?",
+    "golden_answers": [
+     "Ultraviolence"
+    ],
+    "output": "21",
+    "answer": "21",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which entity is a member of the Museum Association of New York and is distinct from the Hudson River Museum?",
+    "golden_answers": [
+     "Hudson River Maritime Museum"
+    ],
+    "output": "The Metropolitan Museum of Art",
+    "answer": "The Metropolitan Museum of Art",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which entity shares a border with both Plum and Turtle Creek?",
+    "golden_answers": [
+     "Monroeville"
+    ],
+    "output": "Bridge City",
+    "answer": "Bridge City",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which river flows through both Hennepin County and Nicollet County in Minnesota?",
+    "golden_answers": [
+     "Minnesota River"
+    ],
+    "output": "Mississippi River",
+    "answer": "Mississippi River",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which sector shares a border with the Confederation Sector and includes City Park Saskatoon as part of its area?",
+    "golden_answers": [
+     "Core Neighbourhoods Sector"
+    ],
+    "output": "Huron Sector",
+    "answer": "Huron Sector",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which entity shares a border with Aroostook County, Restigouche County, and York County?",
+    "golden_answers": [
+     "Victoria County"
+    ],
+    "output": "New Brunswick",
+    "answer": "New Brunswick",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What route has replaced Route nationale 132 and has been replaced by Route nationale 132?",
+    "golden_answers": [
+     "Route nationale 10"
+    ],
+    "output": "Route nationale 132 has replaced D924 and replaced by D924",
+    "answer": "Route nationale 132 has replaced D924 and replaced by D924",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What railway is connected to both the Milan\u2013Venice railway and the Milan\u2013Asso railway?",
+    "golden_answers": [
+     "Milan Passante railway"
+    ],
+    "output": "Milan\u2013Lodi railway",
+    "answer": "Milan\u2013Lodi railway",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual had both Sanghamitra Das and Myoung-jae Lee as doctoral students?",
+    "golden_answers": [
+     "Charles F. Manski"
+    ],
+    "output": "Dilip Chakrabarti",
+    "answer": "Dilip Chakrabarti",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which shrine is classified as a Shikinaisha, a Kokuhei Shosha according to Engishiki, a Beppyo Shrine, and is located in Suzuka district?",
+    "golden_answers": [
+     "Tsubaki Grand Shrine"
+    ],
+    "output": "Suzuka Shrine",
+    "answer": "Suzuka Shrine",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which operating system has derivative works NetHunter and OpenZaurus?",
+    "golden_answers": [
+     "Debian"
+    ],
+    "output": "Android",
+    "answer": "Android",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which poet was born in Brights Grove and holds Canadian citizenship?",
+    "golden_answers": [
+     "Paul Vermeersch"
+    ],
+    "output": "E.J. Pratt",
+    "answer": "E.J. Pratt",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual is known as a boxer, is associated with New Zealand, and has been a member of the sports team St. George Illawarra Dragons?",
+    "golden_answers": [
+     "Solomon Haumono"
+    ],
+    "output": "Mark Hargreaves",
+    "answer": "Mark Hargreaves",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which musician specializes in both folk music and traditional pop and studied under Seyyed Mohammd Taherpour?",
+    "golden_answers": [
+     "Alireza Eftekhari"
+    ],
+    "output": "Parviz Meshkatian",
+    "answer": "Parviz Meshkatian",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What film, directed by Roger Spottiswoode, is primarily in English and is set in Washington?",
+    "golden_answers": [
+     "The Pursuit of D. B. Cooper"
+    ],
+    "output": "Patriot Games",
+    "answer": "Patriot Games",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which rugby league player has been a member of the Penrith Panthers, Samoa national rugby league team, Manly-Warringah Sea Eagles, and the South Sydney Rabbitohs?",
+    "golden_answers": [
+     "Joe Galuvao"
+    ],
+    "output": "Jason Taumalolo",
+    "answer": "Jason Taumalolo",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which historical figure was educated at Uppsala University and has a child named Astrid Ebba Christiana Sandels?",
+    "golden_answers": [
+     "Johan August Sandels"
+    ],
+    "output": "Gustav III of Sweden",
+    "answer": "Gustav III of Sweden",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What film features both Massimo Anzellotti and Sergio Di Pinto in its cast?",
+    "golden_answers": [
+     "Liquirizia"
+    ],
+    "output": "C'eravamo tanto amati",
+    "answer": "C'eravamo tanto amati",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which artist attended the Government College of Fine Arts, Chennai, speaks both English and Tamil, and follows Islam?",
+    "golden_answers": [
+     "Syed Thajudeen"
+    ],
+    "output": "V. S. Gaitonde",
+    "answer": "V. S. Gaitonde",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual held the position of kyrkoherde i Adolf Fredriks f\u00f6rsamling and also served as the Archbishop of Uppsala?",
+    "golden_answers": [
+     "Johan Olof Wallin"
+    ],
+    "output": "Johan Vilhelm Ekberg",
+    "answer": "Johan Vilhelm Ekberg",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which satellite has a BCP-300 bus design, was involved in a spacecraft decommissioning, and experienced a contract awarding event?",
+    "golden_answers": [
+     "NEXTSat"
+    ],
+    "output": "Juno",
+    "answer": "Juno",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What album includes both the tracklist \"Rent\" and \"Love Pains\"?",
+    "golden_answers": [
+     "Results"
+    ],
+    "output": "The Album \"1989\" by Taylor Swift includes both \"Shake It Off\" and \"Love Story\". However, \"Rent\" is not a track on Taylor Swift's \"1989\" album. It seems there might be a mix-up in the track names.",
+    "answer": "The Album \"1989\" by Taylor Swift includes both \"Shake It Off\" and \"Love Story\". However, \"Rent\" is not a track on Taylor Swift's \"1989\" album. It seems there might be a mix-up in the track names.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which basketball player was a member of Ratiopharm Ulm and attended Brigham Young University?",
+    "golden_answers": [
+     "Trent Plaisted"
+    ],
+    "output": "Derrick Rose",
+    "answer": "Derrick Rose",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What film is directed by Jon S. Baird and set in Scotland?",
+    "golden_answers": [
+     "Filth"
+    ],
+    "output": "Brave",
+    "answer": "Brave",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual is both a politician and an alumnus of Urmia University, and was born in Urmia?",
+    "golden_answers": [
+     "Nader Ghazipour"
+    ],
+    "output": "Ali Shamkhani",
+    "answer": "Ali Shamkhani",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which literary work has editions titled \u0411\u043e\u0447\u043a\u0430 \u0430\u043c\u043e\u043d\u0442\u0438\u043b\u043b\u0438\u0430\u0434\u043e and \u0411\u043e\u0447\u043a\u0430 \u0430\u043c\u043e\u043d\u0442\u0438\u043b\u044c\u044f\u0434\u043e?",
+    "golden_answers": [
+     "The Cask of Amontillado"
+    ],
+    "output": "The literary work with editions titled \u0411\u043e\u0447\u043a\u0430 \u0430\u043c\u043e\u043d\u0442\u0438\u043b\u043b\u0438\u0430\u0434\u043e and \u0411\u043e\u0447\u043a\u0430 \u0430\u043c\u043e\u043d\u0442\u0438\u043b\u044c\u044f\u0434\u043e is \"The Flask of Amontillado\" by Anton Chekhov.",
+    "answer": "The literary work with editions titled \u0411\u043e\u0447\u043a\u0430 \u0430\u043c\u043e\u043d\u0442\u0438\u043b\u043b\u0438\u0430\u0434\u043e and \u0411\u043e\u0447\u043a\u0430 \u0430\u043c\u043e\u043d\u0442\u0438\u043b\u044c\u044f\u0434\u043e is \"The Flask of Amontillado\" by Anton Chekhov.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which metropolitan area overlaps with Chicagoland and includes the significant place Des Plaines?",
+    "golden_answers": [
+     "Chicago metropolitan area"
+    ],
+    "output": "Chicago metropolitan area",
+    "answer": "Chicago metropolitan area",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "Which river is associated with lakes on both the \u00d6vre Hillen and \u0628\u062d\u064a\u0631\u0647 \u0646\u064a\u062f\u0631 \u0646\u0648\u0631\u064a\u0646?",
+    "golden_answers": [
+     "Kolb\u00e4cks\u00e5n"
+    ],
+    "output": "Lake Van",
+    "answer": "Lake Van",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which royal figure had the given name Davit and was the parent of \u041c\u0437\u0435\u0445\u0430\u0442\u0443\u043d \u0414\u0430\u0432\u0438\u0434\u043e\u0432\u043d\u0430 \u0418\u043c\u0435\u0440\u0435\u0442\u0438\u043d\u0441\u043a\u0430\u044f?",
+    "golden_answers": [
+     "David II of Imereti"
+    ],
+    "output": "David IV Pantaleon, King of Georgia",
+    "answer": "David IV Pantaleon, King of Georgia",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which historical figure authored the notable work \"De immortalitate animae\" and communicated using Old French?",
+    "golden_answers": [
+     "William of Auvergne"
+    ],
+    "output": "Peter Abelard",
+    "answer": "Peter Abelard",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which sports player has been a member of the South Sydney Rabbitohs, St. George Illawarra Dragons, St. George Dragons, Canberra Raiders, and Queensland Maroons teams?",
+    "golden_answers": [
+     "Mitch Brennan"
+    ],
+    "output": "Wade Graham",
+    "answer": "Wade Graham",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual has received education from both Goldsmiths University of London and Gloucestershire College?",
+    "golden_answers": [
+     "Mary Evans"
+    ],
+    "output": "Derek Draper",
+    "answer": "Derek Draper",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which band features both Jack Green and Twink as members?",
+    "golden_answers": [
+     "The Pretty Things"
+    ],
+    "output": "The Wiggles",
+    "answer": "The Wiggles",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What atlas has been reviewed by both Cyril Mango and John Buckler?",
+    "golden_answers": [
+     "Barrington Atlas of the Greek and Roman World"
+    ],
+    "output": "The Byzantine Atlas",
+    "answer": "The Byzantine Atlas",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which river has Price Run and Stamping Creek as its tributaries?",
+    "golden_answers": [
+     "Greenbrier River"
+    ],
+    "output": "Youghiogheny River",
+    "answer": "Youghiogheny River",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which writer and novelist attended Leeds High School and received the Bram Stoker Award for Novel?",
+    "golden_answers": [
+     "Caitl\u00edn R. Kiernan"
+    ],
+    "output": "James S. A. Corey",
+    "answer": "James S. A. Corey",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is the name of the interchange station that is also a historic building located in Basmane?",
+    "golden_answers": [
+     "Basmane railway station"
+    ],
+    "output": "Basmane Station",
+    "answer": "Basmane Station",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which military force was succeeded by both the Latvian National Armed Forces and the Lithuanian Armed Forces?",
+    "golden_answers": [
+     "Soviet Armed Forces"
+    ],
+    "output": "Latvian and Lithuanian Home Fronts",
+    "answer": "Latvian and Lithuanian Home Fronts",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual was born in \u0136ie\u0123e\u013ci and studied at the Saint Petersburg Stieglitz State Academy of Art and Design?",
+    "golden_answers": [
+     "Rihards Zari\u0146\u0161"
+    ],
+    "output": "Edi Rama",
+    "answer": "Edi Rama",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What venue serves as the home for both the Calgary Boomers and Calgary Wild FC?",
+    "golden_answers": [
+     "McMahon Stadium"
+    ],
+    "output": "Enmax Corus Field",
+    "answer": "Enmax Corus Field",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which entity held the position of kyrkoherde i Hedvig Eleonora f\u00f6rsamling and has the given name Henrik?",
+    "golden_answers": [
+     "Erik Bergman"
+    ],
+    "output": "Henrik Carlsson",
+    "answer": "Henrik Carlsson",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What river is located in Riverside County and includes the Santa Ana Wash as part of its system?",
+    "golden_answers": [
+     "Santa Ana River"
+    ],
+    "output": "Santa Ana River",
+    "answer": "Santa Ana River",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "What conflict involved both the Puebloan peoples and the Purepecha as participants?",
+    "golden_answers": [
+     "Tiguex War"
+    ],
+    "output": "The conflict was the Chichimec Wars.",
+    "answer": "The conflict was the Chichimec Wars.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which entity is located in the UTC\u221206:00 time zone and contains the settlement known as Ciudad Guzm\u00e1n?",
+    "golden_answers": [
+     "Zapotl\u00e1n el Grande"
+    ],
+    "output": "Mexico",
+    "answer": "Mexico",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual is the parent of both Abu Hudhaifah ibn al-Mughirah and Hisham ibn al-Mughira?",
+    "golden_answers": [
+     "Al-Mughira ibn Abd Allah"
+    ],
+    "output": "al-Mughirah ibn Shu'bah",
+    "answer": "al-Mughirah ibn Shu'bah",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What film features the character Diesel 10 and has Edward Glen as a voice actor?",
+    "golden_answers": [
+     "Thomas and the Magic Railroad"
+    ],
+    "output": "Despicable Me",
+    "answer": "Despicable Me",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which designer has works in the collection Mobilier national and was employed by Gebr\u00fcder Thonet?",
+    "golden_answers": [
+     "Pierre Paulin"
+    ],
+    "output": "Jean-Paul Viguier",
+    "answer": "Jean-Paul Viguier",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which children's writer was born in Japan and has been nominated for the Nebula Award for Best Novel?",
+    "golden_answers": [
+     "Ursula Vernon"
+    ],
+    "output": "Naomi Novik",
+    "answer": "Naomi Novik",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual was born in Naunhof and is known for being an exlibrist?",
+    "golden_answers": [
+     "Paul Horst-Schulze"
+    ],
+    "output": "Johann Georg Keyssler",
+    "answer": "Johann Georg Keyssler",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which basketball player is associated with the Basketball Bundesliga, was born in Pawtucket, and attended Manhattan University?",
+    "golden_answers": [
+     "Jeff Xavier"
+    ],
+    "output": "Donyell Marshall",
+    "answer": "Donyell Marshall",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What album was produced by both Kanye West and Pop Wansel?",
+    "golden_answers": [
+     "Cruel Summer"
+    ],
+    "output": "Graduation",
+    "answer": "Graduation",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What album features performer Claude L\u00e9veill\u00e9e and is available in the compact disc format?",
+    "golden_answers": [
+     "1 fois 5"
+    ],
+    "output": "\"Le Chemin de Traverse\"",
+    "answer": "\"Le Chemin de Traverse\"",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What musical work is performed by Vanity Fare?",
+    "golden_answers": [
+     "Hitchin' a Ride"
+    ],
+    "output": "The Blue Danube",
+    "answer": "The Blue Danube",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What town shares its borders with Oyster Bay, Islip, and Huntington?",
+    "golden_answers": [
+     "Babylon"
+    ],
+    "output": "Nassau",
+    "answer": "Nassau",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which athletic conference includes both the Northern Illinois Huskies football team and the Grand Canyon Antelopes?",
+    "golden_answers": [
+     "Mountain West Conference"
+    ],
+    "output": "Sun Belt Conference",
+    "answer": "Sun Belt Conference",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which historical agreement, classified as a capitulation and originating under the Crown of Castile, currently holds a public domain copyright status?",
+    "golden_answers": [
+     "Capitulations of Santa Fe"
+    ],
+    "output": "Treaty of Tordesillas",
+    "answer": "Treaty of Tordesillas",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which sports player was a member of the Northern Eagles, the North Sydney Bears, and the Canterbury-Bankstown Bulldogs?",
+    "golden_answers": [
+     "Mark O'Meley"
+    ],
+    "output": "Mark Jackson",
+    "answer": "Mark Jackson",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which municipality in Spain is bordered by a town that shares its name with a type of geographical depression, a city known for its historical significance in the region, and another town with a name reminiscent of a medieval military order?",
+    "golden_answers": [
+     "Corral de Calatrava"
+    ],
+    "output": "Burgos",
+    "answer": "Burgos",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What is the name of the location that serves both as a transit hub and a site of historical significance within the area known for its cultural heritage in Basmane?",
+    "golden_answers": [
+     "Basmane railway station"
+    ],
+    "output": "Basilica of Our Lady of Lourdes",
+    "answer": "Basilica of Our Lady of Lourdes",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What movie set in a mythical kingdom shares voice talents with an actor known for narrating tales in a land famous for its legendary sword and another actor recognized for bringing to life a world where animals speak like humans?",
+    "golden_answers": [
+     "Quest for Camelot"
+    ],
+    "output": "Shrek",
+    "answer": "Shrek",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which county in Canada shares a border with a county that borders a county known for its proximity to Dorchester, another county that borders a county in Canada, and a third county that borders a county in Canada?",
+    "golden_answers": [
+     "Kings County"
+    ],
+    "output": "Saskatchewan",
+    "answer": "Saskatchewan",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which municipality, located in Allegheny County, Pennsylvania, is bordered by a town that shares its name with a type of ceremonial headwear, another town known for its historical steel industry, a borough named after a type of bird, and a community that shares its name with a European country?",
+    "golden_answers": [
+     "Rankin"
+    ],
+    "output": "Pittsburgh",
+    "answer": "Pittsburgh",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Identify the writer who hails from a city known for its chili and has been connected with a prominent New York state university, while also being recognized by a prestigious science fiction award established in the late 1980s.",
+    "golden_answers": [
+     "Nnedi Okorafor"
+    ],
+    "output": "Cory Doctorow",
+    "answer": "Cory Doctorow",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual, known for their career in professional basketball, was born in a city famous for its historical significance in the United States, attended two prestigious educational institutions known for their Quaker heritage, and represents a country known for its influence in global sports?",
+    "golden_answers": [
+     "Mustafa Shakur"
+    ],
+    "output": "LeBron James",
+    "answer": "LeBron James",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which region, located in Canada, shares a border with an area in the United States known for its proximity to Aroostook County, as well as with two Canadian counties, one situated in New Brunswick and the other also within Canada?",
+    "golden_answers": [
+     "Victoria County"
+    ],
+    "output": "Quebec",
+    "answer": "Quebec",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the individual known for their political career, who pursued higher education at an institution located in the city where they were born, specifically in a city that shares its name with both the university and the birthplace?",
+    "golden_answers": [
+     "Nader Ghazipour"
+    ],
+    "output": "Barack Obama",
+    "answer": "Barack Obama",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which railway, situated in Lombardy, serves as a connection between a railway line that extends from Milan to Venice and another line that runs from Milan to Asso?",
+    "golden_answers": [
+     "Milan Passante railway"
+    ],
+    "output": "Lambro Railway",
+    "answer": "Lambro Railway",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Can you identify the athlete who is linked with a professional basketball league in Germany, hails from a city in Rhode Island known for its historical textile industry, and pursued higher education at an institution located in New York City known for its business school?",
+    "golden_answers": [
+     "Jeff Xavier"
+    ],
+    "output": "Trey Burke",
+    "answer": "Trey Burke",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which author, known for writing children's literature, was born in a country known for its rich cultural heritage in East Asia and has received recognition by being nominated for a prestigious American science fiction and fantasy award?",
+    "golden_answers": [
+     "Ursula Vernon"
+    ],
+    "output": "Terry Pratchett was nominated for the Hugo Award, though he is not primarily known for children's literature. A more fitting answer would be Alan Garner, who is known for children's literature and has been nominated for the Hugo Award. However, if we strictly adhere to the birthplace criterion, Lian Hearn, born in Japan, fits the description, as she is known for her children's literature and has been nominated for the Hugo Award.",
+    "answer": "Terry Pratchett was nominated for the Hugo Award, though he is not primarily known for children's literature. A more fitting answer would be Alan Garner, who is known for children's literature and has been nominated for the Hugo Award. However, if we strictly adhere to the birthplace criterion, Lian Hearn, born in Japan, fits the description, as she is known for her children's literature and has been nominated for the Hugo Award.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which atlas, reviewed by a scholar who passed away in Oxford and another scholar who was a citizen of the United States, is known for its comprehensive coverage of ancient civilizations?",
+    "golden_answers": [
+     "Barrington Atlas of the Greek and Roman World"
+    ],
+    "output": "The Atlas of Ancient History",
+    "answer": "The Atlas of Ancient History",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Identify the administrative region that operates within the UTC\u221206:00 time zone and is home to a settlement known for its historical significance as Ciudad Guzm\u00e1n.",
+    "golden_answers": [
+     "Zapotl\u00e1n el Grande"
+    ],
+    "output": "Texas, United States",
+    "answer": "Texas, United States",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which 19th-century portrait artist, often associated with the Canadian religious community's artistic heritage, has his works enhancing both the academic atmosphere of a university gallery in Ottawa and the historical ambience of a museum dedicated to Quebec's Ursuline heritage?",
+    "golden_answers": [
+     "Antoine Plamondon"
+    ],
+    "output": "Louis Riel",
+    "answer": "Louis Riel",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which artist, renowned for their unique folk style and often linked to the ethos of indie film soundtracks, can be connected to the Bavarian music label known for celebrating global cultural diversity as well as the Massachusetts-based label famous for its roots revival projects?",
+    "golden_answers": [
+     "Michael Hurley"
+    ],
+    "output": "Tori Amos",
+    "answer": "Tori Amos",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which poet, who contributed to the intellectual circle akin to Enlightenment salons, served in a role overseeing the institution founded by Mikhail Lomonosov, and had ties to the governmental body managing geological affairs?",
+    "golden_answers": [
+     "Mikhail Kheraskov"
+    ],
+    "output": "Alexei Sumarokov",
+    "answer": "Alexei Sumarokov",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which recognition, associated with the nocturnal and the macabre, has honored both an architect of illustrated satire and a master of speculative fiction shortlists?",
+    "golden_answers": [
+     "Bram Stoker Award for Lifetime Achievement"
+    ],
+    "output": "Bram Stoker Award",
+    "answer": "Bram Stoker Award",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which artwork, known for its portrayal of a historical figure who transformed his realm into an empire, features a religious symbol often seen as a sanctuary for the soul?",
+    "golden_answers": [
+     "The Coronation of Napoleon"
+    ],
+    "output": "The artwork is likely referring to Michelangelo's Sistine Chapel ceiling, particularly the panel depicting Noah's sacrifice, which includes a dove symbolizing the Holy Spirit. However, a more direct answer to the historical figure part might be Raphael's \"School of Athens,\" which portrays Plato, who is often associated with the idea of an ideal realm or empire of knowledge.",
+    "answer": "The artwork is likely referring to Michelangelo's Sistine Chapel ceiling, particularly the panel depicting Noah's sacrifice, which includes a dove symbolizing the Holy Spirit. However, a more direct answer to the historical figure part might be Raphael's \"School of Athens,\" which portrays Plato, who is often associated with the idea of an ideal realm or empire of knowledge.",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "What essential tool, akin to a lifeline in a vertiginous ballet, often partners with a device named for securing trust?",
+    "golden_answers": [
+     "climbing rope"
+    ],
+    "output": "safety harness",
+    "answer": "safety harness",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which athlete, who has journeyed through the Mariners of Lincolnshire, the Addicks of the English capital, and the Pilgrims of the South West, shares a career path with a certain Corkonian known for his strategic play on the field?",
+    "golden_answers": [
+     "Billy Clarke"
+    ],
+    "output": "Paddy McLaughlin",
+    "answer": "Paddy McLaughlin",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Identify the person who shares a birthplace with the last ruler of the Kingdom of Romania's first industrial city, walked the halls where Sartre once taught, and now navigates the corridors of civic responsibility akin to those in the network of the city's subways.",
+    "golden_answers": [
+     "Nicu\u0219or Dan"
+    ],
+    "output": "Adriana Cioac\u0103",
+    "answer": "Adriana Cioac\u0103",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual, symbolically linked to the crimson and cream of a notable brotherhood, shares a political path with a former Floridian representative, and emerged from the city where the stars and stripes are legislated?",
+    "golden_answers": [
+     "Walter E. Fauntroy"
+    ],
+    "output": "Marco Rubio",
+    "answer": "Marco Rubio",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which athletic conference is known for including a football team from a university located in DeKalb, Illinois, and a university whose mascot is an antelope?",
+    "golden_answers": [
+     "Mountain West Conference"
+    ],
+    "output": "Missouri Valley Football Conference",
+    "answer": "Missouri Valley Football Conference",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which river in the United States has a tributary located in Pocahontas County and another tributary known by the name Price Run?",
+    "golden_answers": [
+     "Greenbrier River"
+    ],
+    "output": "Greenbrier River",
+    "answer": "Greenbrier River",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "Who is the individual recognized for their contributions to the art of scenography and whose final resting place is in a city that serves as the capital of the Autonomous Republic of Abkhazia, a region within the country of Georgia?",
+    "golden_answers": [
+     "Alexander Shervashidze"
+    ],
+    "output": "Oleg Taktakishvili",
+    "answer": "Oleg Taktakishvili",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which historical monarch, known by the given name Davit, was the progenitor of an aristocrat named \u041c\u0437\u0435\u0445\u0430\u0442\u0443\u043d \u0414\u0430\u0432\u0438\u0434\u043e\u0432\u043d\u0430 \u0418\u043c\u0435\u0440\u0435\u0442\u0438\u043d\u0441\u043a\u0430\u044f?",
+    "golden_answers": [
+     "David II of Imereti"
+    ],
+    "output": "Davit I of Georgia",
+    "answer": "Davit I of Georgia",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which military force was replaced by the armed forces that are headquartered in Riga and Vilnius?",
+    "golden_answers": [
+     "Soviet Armed Forces"
+    ],
+    "output": "Baltic Defense Force",
+    "answer": "Baltic Defense Force",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Identify the individual who, despite having a given name that suggests otherwise, held the ecclesiastical leadership role in a notable Swedish parish known for its association with a queen consort.",
+    "golden_answers": [
+     "Erik Bergman"
+    ],
+    "output": "Johan Georg von Rosen",
+    "answer": "Johan Georg von Rosen",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which historical document, recognized as a form of agreement and originating from a medieval Iberian kingdom, is known for its unrestricted reproduction rights due to its age and classification as a capitulation?",
+    "golden_answers": [
+     "Capitulations of Santa Fe"
+    ],
+    "output": "Magna Carta",
+    "answer": "Magna Carta",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which river is associated with a lake located in Sweden and another lake situated in Ludvika Municipality?",
+    "golden_answers": [
+     "Kolb\u00e4cks\u00e5n"
+    ],
+    "output": "V\u00e4ttern",
+    "answer": "V\u00e4ttern",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which operating system is the foundation for a project known for its penetration testing capabilities in the United States and also serves as the base for a system designed for handheld devices?",
+    "golden_answers": [
+     "Debian"
+    ],
+    "output": "Kali Linux",
+    "answer": "Kali Linux",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which river traverses both a county that is part of the administrative region encompassing the city of Minneapolis and a county that is part of the administrative region encompassing the city of St. Peter, both located in the United States?",
+    "golden_answers": [
+     "Minnesota River"
+    ],
+    "output": "Mississippi River",
+    "answer": "Mississippi River",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Identify the literary work that has been translated into Russian with titles that include variations of the phrase referring to a type of wine container, specifically \"\u0411\u043e\u0447\u043a\u0430 \u0430\u043c\u043e\u043d\u0442\u0438\u043b\u043b\u0438\u0430\u0434\u043e\" and \"\u0411\u043e\u0447\u043a\u0430 \u0430\u043c\u043e\u043d\u0442\u0438\u043b\u044c\u044f\u0434\u043e.\"",
+    "golden_answers": [
+     "The Cask of Amontillado"
+    ],
+    "output": "The House of the Spirits",
+    "answer": "The House of the Spirits",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which metropolitan area, known for overlapping with a region located in the United States, includes a significant place situated in Cook County?",
+    "golden_answers": [
+     "Chicago metropolitan area"
+    ],
+    "output": "Chicago metropolitan area",
+    "answer": "Chicago metropolitan area",
+    "correct": 1.0,
+    "em": 1.0
+   },
+   {
+    "question": "Which interactive entertainment experience, known for its strategic exploration, expansion, exploitation, and extermination gameplay, is set in the cosmos and primarily navigated using a pointing device?",
+    "golden_answers": [
+     "Master of Orion"
+    ],
+    "output": "Kerbal Space Program",
+    "answer": "Kerbal Space Program",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which artist, who pursued their education at an institution known for its contributions to the arts in Chennai, is proficient in a language commonly spoken in Canada and another language spoken in parts of Indonesia, and practices a religion that is one of the major world faiths?",
+    "golden_answers": [
+     "Syed Thajudeen"
+    ],
+    "output": "Shubham Srivastava",
+    "answer": "Shubham Srivastava",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual, known for authoring a work titled \"Mu\u1e0fakkar\u0101t Mu\u1e25ammad \u02bfIzza\u1e97 Dar\u016bza\u1e97,\" was a citizen of a territory under the administration of the British Empire during the early 20th century?",
+    "golden_answers": [
+     "Izzat Darwaza"
+    ],
+    "output": "Muhammad Izzat Darwaza",
+    "answer": "Muhammad Izzat Darwaza",
+    "correct": 1.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which satellite, characterized by a BCP-300 bus design, was notably involved in both a spacecraft decommissioning process and an event where a contract was awarded?",
+    "golden_answers": [
+     "NEXTSat"
+    ],
+    "output": "IRS-1C",
+    "answer": "IRS-1C",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which album, performed by an artist known for a tracklist that includes \"Pretty When You Cry,\" also features a rendition of \"The Other Woman\" by the same performer?",
+    "golden_answers": [
+     "Ultraviolence"
+    ],
+    "output": "Tearsitura",
+    "answer": "Tearsitura",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which album by the performer known for both the song \"Rent\" and the song \"Love Pains\" features these tracks?",
+    "golden_answers": [
+     "Results"
+    ],
+    "output": "Wicked",
+    "answer": "Wicked",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual, known for their education in an institution located in Uppsala Municipality, is also recognized as the parent of a person with Swedish citizenship named Astrid Ebba Christiana Sandels?",
+    "golden_answers": [
+     "Johan August Sandels"
+    ],
+    "output": "Olof Rudbeck the Younger",
+    "answer": "Olof Rudbeck the Younger",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which educational system encompasses an institution known for its vocational training in Los Angeles and another college situated in California's Bay Area?",
+    "golden_answers": [
+     "California Community Colleges"
+    ],
+    "output": "City College System",
+    "answer": "City College System",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Identify the athlete who played for a German basketball team known for its association with a pharmaceutical company and also pursued higher education at an institution founded by a religious group in Utah.",
+    "golden_answers": [
+     "Trent Plaisted"
+    ],
+    "output": "Dennis Rodman",
+    "answer": "Dennis Rodman",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Identify the person who pursued higher education at an institution located in Rochester, New York, and has gained recognition in the field of composing lyrics and music.",
+    "golden_answers": [
+     "Charles Strouse"
+    ],
+    "output": "Igor Stravinsky",
+    "answer": "Igor Stravinsky",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which football player has been a member of a team based in Istanbul and also played for a team headquartered in Riga?",
+    "golden_answers": [
+     "Milo\u0161 Joji\u0107"
+    ],
+    "output": "Hakan \u015e\u00fck\u00fcr",
+    "answer": "Hakan \u015e\u00fck\u00fcr",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Who is the individual known for holding a prominent ecclesiastical position in Sweden, specifically as the leader of a parish in the capital city, and later ascended to the highest clerical office in the Swedish Church?",
+    "golden_answers": [
+     "Johan Olof Wallin"
+    ],
+    "output": "Olof Palladius",
+    "answer": "Olof Palladius",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which individual, recognized for their dual talents in painting and illustrating, has their creations housed in a collection located in the Netherlands, received their education at an institution known for its historical significance in Dumbarton, and held citizenship in a nation that existed prior to the formation of the modern United Kingdom?",
+    "golden_answers": [
+     "William Strang"
+    ],
+    "output": "Dorothea Sharp",
+    "answer": "Dorothea Sharp",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Identify the sacred site that is recognized as a shrine of historical significance according to the Engishiki classification, holds the status of a Beppyo Shrine, and is situated within the Suzuka district.",
+    "golden_answers": [
+     "Tsubaki Grand Shrine"
+    ],
+    "output": "Suzuka Shrine",
+    "answer": "Suzuka Shrine",
+    "correct": 0.0,
+    "em": 0.0
+   },
+   {
+    "question": "Which river, located in the United States, has tributaries including one found in McDowell County and another known as Davy Branch?",
+    "golden_answers": [
+     "Tug Fork"
+    ],
+    "output": "Tug River",
+    "answer": "Tug River",
+    "correct": 1.0,
+    "em": 0.0
+   }
+  ]
+ ]
+}

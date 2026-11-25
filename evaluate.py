@@ -1,4 +1,5 @@
-"""Bamboogle (125 questions): AgentFlow's Table 1 rows for Qwen2.5-7B-Instruct.
+"""AgentFlow's Table 1 rows for Qwen2.5-7B-Instruct on Bamboogle (125 questions, Part 1) or on LiveSearchBench's
+2025 set (300 questions, Part 2: --dataset livesearchbench).
 
   direct     the base model answers alone, greedy, with Search-R1's Direct Inference prompt (the paper's
              Qwen-2.5-7B-Instruct row, 12.0, is Search-R1's number for this setting)
@@ -27,9 +28,23 @@ from google_search import DeepSeekSearch
 MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
 BAMBOOGLE_CSV = ("https://docs.google.com/spreadsheets/d/1jwcsA5kE4TObr9YHn9Gc-wQHYjTbLhDGx6tmIzMhl_U"
                  "/export?format=csv&gid=0")
+LIVESEARCHBENCH = ("https://raw.githubusercontent.com/hengzzzhou/LiveSearchbench/"
+                   "e0286dc1361bbd91e663a7423f4b3f8959c14b15/bench/2025/level{}.json")
 # FlashRAG's zero-shot prompt, which Search-R1 uses for Direct Inference.
 DIRECT_SYSTEM = ("Answer the question based on your own knowledge. "
                  "Only give me the answer and do not output any other words.")
+
+
+def load_livesearchbench(cache):
+    """LiveSearchBench (Zhou et al., 2025, arXiv 2511.01409), its 2025 set: levels 1-3, 150 + 100 + 50 questions
+    built from Wikidata changes, one answer each (a Wikidata label), at the repository's commit of 1 Sep 2026."""
+    cache = Path(cache)
+    if not cache.exists():
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        cache.write_text(json.dumps([qa for level in (1, 2, 3) for qa in
+                                     json.load(urllib.request.urlopen(LIVESEARCHBENCH.format(level)))["qa_pairs"]]))
+    return [{"question": x["question"].strip(), "golden_answers": [x["answer"].strip()]}
+            for x in json.loads(cache.read_text())]
 
 
 def load_bamboogle(cache):
@@ -100,7 +115,9 @@ def main():
     parser.add_argument("--google-search", action="store_true",
                         help="add the official Google_Search_Tool, answered by DeepSeek's web search (DEEPSEEK_API_KEY)")
     parser.add_argument("--retrieval", default="data/retrieval")
+    parser.add_argument("--dataset", choices=["bamboogle", "livesearchbench"], default="bamboogle")
     parser.add_argument("--bamboogle", default="data/bamboogle.csv")
+    parser.add_argument("--livesearchbench", default="data/livesearchbench_2025.json")
     parser.add_argument("--trials", type=int, default=3)
     parser.add_argument("--max-steps", type=int, default=10)
     parser.add_argument("--temperature", type=float, default=0.7)
@@ -119,7 +136,8 @@ def main():
     from vllm import LLM, SamplingParams
     from vllm.lora.request import LoRARequest
 
-    data = load_bamboogle(args.bamboogle)[:args.limit]
+    data = (load_bamboogle(args.bamboogle) if args.dataset == "bamboogle" else
+            load_livesearchbench(args.livesearchbench))[:args.limit]
     api = ApiLLM(args.api_base, args.api_model, args.api_key_env) if args.api_base else None
     tokenizer = Messages() if api else AutoTokenizer.from_pretrained(args.model)
     trials = []
@@ -147,7 +165,7 @@ def main():
             trials.append(rows)
             print(f"trial {trial}: accuracy {sum(r['correct'] for r in rows) / len(rows):.3f}", flush=True)
     accuracy = [sum(r["correct"] for r in rows) / len(rows) for rows in trials]
-    summary = {"mode": args.mode, "adapter": args.adapter, "n": len(data), "accuracy": statistics.mean(accuracy),
+    summary = {"dataset": args.dataset, "mode": args.mode, "adapter": args.adapter, "n": len(data), "accuracy": statistics.mean(accuracy),
                "accuracy_std": statistics.pstdev(accuracy), "trials": accuracy,
                "em": statistics.mean(sum(r["em"] for r in rows) / len(rows) for rows in trials)}
     if args.mode == "agentflow":
