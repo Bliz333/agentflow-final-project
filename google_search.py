@@ -56,5 +56,9 @@ class DeepSeekSearch:
         return cite(message.content or "", message.annotations)
 
     def run(self, queries):
+        """One search per distinct query of the batch: in training, the 8 rollouts of a question often send the
+        same query in the same turn, and each search costs about 5k tokens of search results."""
+        distinct = list(dict.fromkeys(queries))
         with ThreadPoolExecutor(self.workers) as pool:
-            return list(pool.map(self.search, queries))
+            answers = dict(zip(distinct, pool.map(self.search, distinct)))
+        return [answers[q] for q in queries]
