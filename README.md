@@ -8,13 +8,14 @@ Canvas by its link).
 
 Replication of three Bamboogle rows of Table 1 of **AgentFlow** (Li et al., 2025,
 [arXiv 2510.05592](https://arxiv.org/abs/2510.05592)): *Qwen-2.5-7B-Instruct*, *AgentFlow* (untrained)
-and *AgentFlow w/ Flow-GRPO*, training the planner with **LoRA** instead of full fine-tuning.
+and *AgentFlow w/ Flow-GRPO*, training the planner with **LoRA** instead of full fine-tuning. Part 2, the
+same rows on a 2025 dataset (LiveSearchBench), is the last section.
 
 | File | What it is |
 |---|---|
 | [`agentflow.py`](agentflow.py) | The AgentFlow loop (planner → executor → tool → verifier, then the solution generator), the official prompts, the tools and the judge |
 | [`train.py`](train.py) | Flow-GRPO: 32 questions × 8 rollouts per step, outcome reward broadcast to every planner turn, group-normalised advantage, clipped objective + KL, LoRA |
-| [`evaluate.py`](evaluate.py) | Bamboogle: `direct` (the base model alone) and `agentflow` (untrained or with an adapter, 3 trials) |
+| [`evaluate.py`](evaluate.py) | Bamboogle or LiveSearchBench (`--dataset`): `direct` (the base model alone) and `agentflow` (untrained or with an adapter, 3 trials) |
 | [`retriever.py`](retriever.py) | Search-R1's E5 search over the 2018 Wikipedia dump (from our Search-R1 replication) |
 | [`prep_index.py`](prep_index.py) | Builds `data/retrieval` from the files Search-R1 publishes (run once) |
 | [`wikipedia.py`](wikipedia.py) | The official Wikipedia_Search_Tool on live Wikipedia (`--search wikipedia`, section 1) |
@@ -258,4 +259,52 @@ sbatch -J flow_grpo_greedy cluster/train.sbatch --steps 200 --lr 1e-4 --module-t
 sbatch -J eval cluster/eval.sbatch --mode agentflow --adapter $W/runs/flow_grpo/adapters/step_XXXX \
   --out $W/results/flow_grpo.json
 python diagnose.py --adapter $W/runs/flow_grpo/adapters/step_0030 --out $W/results/diagnose.json   # one GPU
+```
+
+## Part 2 — LiveSearchBench 2025
+
+**Dataset**: LiveSearchBench (Zhou et al., 2025, [arXiv 2511.01409](https://arxiv.org/abs/2511.01409), November
+2025, CC BY 4.0), which the AgentFlow paper does not use. Its questions are generated from changes in
+Wikidata, and each has one answer checked with SPARQL. We use its 2025 set: 300 questions from the
+[repository](https://github.com/hengzzzhou/LiveSearchbench) at commit `e0286dc`, split into level 1 (150
+single-fact questions), level 2 (100 questions with several constraints) and level 3 (50 questions with
+obfuscated descriptions). Level 1 is adversarial: 83 of its 150 questions are ones the authors' models
+never answered correctly in 4 tries.
+
+**Same system as Part 1's main table**:
+- the same tools (Google Search through DeepSeek, Search-R1's local 2018 Wikipedia retriever);
+- the same judge, 3 trials, at most 10 turns;
+- the same Flow-GRPO adapter: step 30, trained on NQ + HotpotQA. The paper also trains once and evaluates
+  on every benchmark, and the dataset has no training split.
+
+| LiveSearchBench 2025, 300 questions | accuracy | EM | level 1 / 2 / 3 |
+|---|---|---|---|
+| Qwen-2.5-7B-Instruct (no tools) | 10.7 | 4.3 | 14.7 / 6.0 / 8.0 |
+| AgentFlow, untrained | 56.7 ± 0.7 | 9.9 | 59.6 / 61.0 / 39.3 |
+| AgentFlow w/ Flow-GRPO (LoRA), step 30 | **58.4 ± 0.4** | 13.2 | 58.4 / 63.0 / 49.3 |
+
+(`results/lsb_direct.json`, `results/lsb_agentflow.json`, `results/lsb_flow_grpo_step_0030.json`)
+
+- **Qwen-2.5-7B-Instruct** knows few of these 2025 facts (10.7). With web search, the agent answers 57.
+- **Flow-GRPO**: +1.8 points paired by question (95 % interval −1.2 to +4.8; 58 questions better, 52
+  worse). It gains +10 on level 3 (50 questions) and +3.3 in exact match.
+- **Over both datasets** (425 questions):
+  - accuracy: +2.2 (−0.4 to +4.8), not significant;
+  - exact match: +3.5 (+1.2 to +5.9).
+
+  The trained planner's answers match the golden answer's wording more often, and the accuracy gain stays
+  within noise after 30 steps.
+- **Answers are Wikidata labels.** The judge rejects partial names, e.g. "Lambeth" when the question asks
+  for the full official name ("London Borough of Lambeth"). Some facts may also have changed since the
+  dataset was built (August–September 2025).
+- **Leakage**: 4 of about 3,000 Google Search results cite the benchmark itself.
+- **Cost**: each AgentFlow evaluation took about 40 minutes of an H100. The two together used about 3,000
+  searches and ¥25 of DeepSeek tokens.
+
+```bash
+modal run modal_app.py --args "--dataset livesearchbench --mode direct" --out results/lsb_direct.json
+modal run modal_app.py --args "--dataset livesearchbench --mode agentflow --google-search --retrieval /data/retrieval" \
+  --out results/lsb_agentflow.json
+modal run modal_app.py --args "--dataset livesearchbench --mode agentflow --google-search --retrieval /data/retrieval \
+  --adapter /runs/flow_grpo_google/adapters/step_0030" --out results/lsb_flow_grpo_step_0030.json
 ```
