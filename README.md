@@ -52,9 +52,10 @@ dump:
   gains 11.2 from a lower start. The training reward stayed level (0.66 / 0.67 / 0.64 over steps 1–10 /
   11–20 / 21–30) while the planner moved from the base model (KL 0.15 per token at step 30); the trained
   planner calls Wikipedia more (505 instead of 286 calls over the 3 trials) and takes more turns (2.4
-  instead of 1.9). Training stopped at 30 steps because of the search cost (about ¥1 of DeepSeek tokens
-  per step at off-peak prices). Steps 1–20 ran on Explorer, 21–30 on Modal (both one H200, same code and
-  data); the untrained system was evaluated on Explorer, the adapter on Modal.
+  instead of 1.9). Training stopped at 30 steps because of the search cost (steps 21–30 and the step-30
+  evaluation together cost ¥8.2 of DeepSeek tokens at off-peak prices). Steps 1–20 ran on Explorer, 21–30
+  on Modal (both one H200, same data). From step 20 on, rollouts of a step that send the same query share
+  one search (steps 1–19 searched every query; the untrained evaluation too), to save tokens.
 
 **Without the Google Search tool** (our first setup: `Base_Generator_Tool` and the local
 `Wikipedia_Search_Tool` only):
