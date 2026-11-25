@@ -205,8 +205,9 @@ OpenAI-compatible API works by changing `JUDGE_URL` / `JUDGE_MODEL` in `agentflo
 `cluster/*.sbatch`.
 
 On Modal (one H100; the 16-minute live-Wikipedia evaluation cost about $1.1, the 12-minute one with
-Google Search about $0.9 plus well under $1 of DeepSeek tokens, about 2–3k per search; Modal needs both
-keys in the environment, e.g. `set -a; . ~/.config/info7375/judge.env; . ~/.config/info7375/deepseek.env; set +a`):
+Google Search about $0.9 plus well under $1 of DeepSeek tokens, about 2–3k per search; the judge key, and
+for `--google-search` the DeepSeek key, must be in the environment, e.g.
+`set -a; . ~/.config/info7375/judge.env; . ~/.config/info7375/deepseek.env; set +a`):
 
 ```bash
 modal run modal_app.py::check                     # CPU only: build the image, run the tests
