@@ -41,6 +41,7 @@ dump:
 | Qwen-2.5-7B-Instruct (no tools) | 12.0 | 18.4 [EM 10.4] |
 | AgentFlow, untrained | 58.4 | **68.0 ± 1.7** [EM 22.1] |
 | AgentFlow w/ Flow-GRPO (LoRA), step 30 | 69.6 | **71.2 ± 3.0** [EM 26.1] |
+| (the paper's released planner, AgentFlow/agentflow-planner-7b, in our system) | 69.6 | 70.4 ± 1.7 [EM 21.3] |
 
 - **Qwen-2.5-7B-Instruct**: the paper's 12.0 is Search-R1's exact-match number for this prompt; our
   exact match is 10.4 (13 of 125 against 15). The judge also accepts answers like "1837" for
@@ -57,6 +58,15 @@ dump:
   evaluation together cost ¥8.2 of DeepSeek tokens at off-peak prices). Steps 1–20 ran on Explorer, 21–30
   on Modal (both one H200, same data). From step 20 on, rollouts of a step that send the same query share
   one search (steps 1–19 searched every query; the untrained evaluation too), to save tokens.
+- **The paper's released planner** (`--planner-model AgentFlow/agentflow-planner-7b`: the authors' fully
+  fine-tuned planner runs the next-step calls, the other modules stay on Qwen2.5-7B-Instruct;
+  `results/agentflow_paper_planner.json`) gains as little in our system: +2.4 paired over the untrained
+  planner (−2.7 to +7.5), the same as our 30-step LoRA (difference −0.8, −6.1 to +4.5). So the short
+  training is not what keeps the gain small here. With today's strong search tool, a well-trained planner
+  adds little over the untrained one, which already answers 68 %.
+  - It was trained with gpt-4o-mini as the frozen modules and with the official tools' training names
+    (`Ground_Google_Search_Tool`, `Wikipedia_RAG_Search_Tool`).
+  - 25 of its 779 tool calls named no tool that our parser matched.
 
 **Without the Google Search tool** (our first setup: `Base_Generator_Tool` and the local
 `Wikipedia_Search_Tool` only):
@@ -257,6 +267,8 @@ sbatch -J eval cluster/eval.sbatch --mode direct --out $W/results/direct.json
 sbatch -J eval cluster/eval.sbatch --mode agentflow --out $W/results/agentflow.json
 sbatch -J flow_grpo cluster/train.sbatch --steps 200 --lr 1e-4   # a chain of 1-hour links
 sbatch -J flow_grpo_google cluster/train.sbatch --steps 30 --lr 1e-4 --google-search
+sbatch -J eval cluster/eval.sbatch --mode agentflow --google-search --planner-model AgentFlow/agentflow-planner-7b \
+  --vllm-mem 0.3 --out $W/results/agentflow_paper_planner.json   # two models: H200
 sbatch -J flow_grpo_greedy cluster/train.sbatch --steps 200 --lr 1e-4 --module-temperature 0
 sbatch -J eval cluster/eval.sbatch --mode agentflow --adapter $W/runs/flow_grpo/adapters/step_XXXX \
   --out $W/results/flow_grpo.json
