@@ -8,7 +8,7 @@ picked pages with that answer, the other pages with a short abstract.
 
 Differences from the official code: page text comes from the MediaWiki API as plain text instead of
 scraping the page's HTML, and abstracts are the search snippets; chunks are ranked with E5-base-v2 instead
-of OpenAI's text-embedding-3-large; the LLM is the base model, the paper's tool engine, instead of
+of OpenAI's text-embedding-3-small; the LLM is the base model, the paper's tool engine, instead of
 gpt-4o-mini. In the released official code the per-page step never runs (the tool's model_string is never
 set, so creating the page tool raises and the tool returns only the titles and abstracts); this is the
 behaviour that code intends.
