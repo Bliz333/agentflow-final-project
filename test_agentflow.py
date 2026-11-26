@@ -108,6 +108,15 @@ def test_solve_runs_modules_in_order_and_stops():
                                                  ("verifier", 0.0), ("generator", 0.0)}
 
 
+def test_planner_llm_runs_only_the_planner_calls():
+    base, planner = ScriptedLLM(), ScriptedLLM()
+    tokenizer = SimpleNamespace(apply_chat_template=lambda m, **kw: "\n".join(x["content"] for x in m))
+    agentflow.solve(base, tokenizer, agentflow.LocalWikipedia(FakeRetriever()), ["Question A"], 3, 0.7,
+                    planner_llm=planner)
+    assert {m for m, _, _ in planner.calls} == {"planner"}
+    assert "planner" not in {m for m, _, _ in base.calls} and "verifier" in {m for m, _, _ in base.calls}
+
+
 def test_verifier_conclusion_ignores_case():
     assert [v.upper() for v in agentflow.CONCLUSION.findall("Enough.\nConclusion: Stop")] == ["STOP"]
 

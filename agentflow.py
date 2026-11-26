@@ -280,11 +280,12 @@ def run_tools(llm, tokenizer, wikipedia, calls, google=None):
 
 
 def solve(llm, tokenizer, wikipedia, questions, max_steps, temperature, lora_request=None, planner_tokens=2048,
-          module_temperature=None, google=None):
+          module_temperature=None, google=None, planner_llm=None):
     """Run AgentFlow on questions (strings, ANSWER_FORMAT already appended); one Episode per question.
 
     `temperature` is the planner's; the other modules use `module_temperature` (default: the same).
-    `google` is the Google_Search_Tool's backend (none = the tool is left out)."""
+    `google` is the Google_Search_Tool's backend (none = the tool is left out). `planner_llm` runs the planner's
+    next-step calls (default: `llm`), e.g. the paper's released planner, a full model rather than a LoRA."""
     module_temperature = temperature if module_temperature is None else module_temperature
     toolbox = {**TOOLBOX, **({"Google_Search_Tool": google.metadata} if google else {}),
                "Wikipedia_Search_Tool": wikipedia.metadata}  # the official order
@@ -300,7 +301,7 @@ def solve(llm, tokenizer, wikipedia, questions, max_steps, temperature, lora_req
         prompts = [chat(tokenizer, NEXT_STEP.format(question=ep.question, analysis=ep.analysis, memory=ep.memory,
                                                     **fill)) for ep in active]
         plans = []
-        for ep, out in zip(active, generate(llm, prompts, planner_tokens, temperature, lora_request)):
+        for ep, out in zip(active, generate(planner_llm or llm, prompts, planner_tokens, temperature, lora_request)):
             gen = out.outputs[0]
             ep.turns.append((list(out.prompt_token_ids), list(gen.token_ids),
                              [lp[t].logprob for lp, t in zip(gen.logprobs, gen.token_ids)] if gen.logprobs else None))

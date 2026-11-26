@@ -41,6 +41,7 @@ dump:
 | Qwen-2.5-7B-Instruct (no tools) | 12.0 | 18.4 [EM 10.4] |
 | AgentFlow, untrained | 58.4 | **68.0 ± 1.7** [EM 22.1] |
 | AgentFlow w/ Flow-GRPO (LoRA), step 30 | 69.6 | **71.2 ± 3.0** [EM 26.1] |
+| (the paper's released planner, AgentFlow/agentflow-planner-7b, in our system) | 69.6 | 70.4 ± 1.7 [EM 21.3] |
 
 - **Qwen-2.5-7B-Instruct**: the paper's 12.0 is Search-R1's exact-match number for this prompt; our
   exact match is 10.4 (13 of 125 against 15). The judge also accepts answers like "1837" for
@@ -57,6 +58,15 @@ dump:
   evaluation together cost ¥8.2 of DeepSeek tokens at off-peak prices). Steps 1–20 ran on Explorer, 21–30
   on Modal (both one H200, same data). From step 20 on, rollouts of a step that send the same query share
   one search (steps 1–19 searched every query; the untrained evaluation too), to save tokens.
+- **The paper's released planner** (`--planner-model AgentFlow/agentflow-planner-7b`: the authors' fully
+  fine-tuned planner runs the next-step calls, the other modules stay on Qwen2.5-7B-Instruct;
+  `results/agentflow_paper_planner.json`) gains as little in our system: +2.4 paired over the untrained
+  planner (−2.7 to +7.5), the same as our 30-step LoRA (difference −0.8, −6.1 to +4.5). So the short
+  training is not what keeps the gain small here. With today's strong search tool, a well-trained planner
+  adds little over the untrained one, which already answers 68 %.
+  - It was trained with gpt-4o-mini as the frozen modules and with the official tools' training names
+    (`Ground_Google_Search_Tool`, `Wikipedia_RAG_Search_Tool`).
+  - 25 of its 779 tool calls named no tool that our parser matched.
 
 **Without the Google Search tool** (our first setup: `Base_Generator_Tool` and the local
 `Wikipedia_Search_Tool` only):
@@ -164,35 +174,37 @@ official tool description). Untrained AgentFlow with both search tools
 
 ## 2. Setup
 
-**As in the paper / official code** ([github.com/lupantech/AgentFlow](https://github.com/lupantech/AgentFlow)):
-four modules on Qwen2.5-7B-Instruct with the official prompts (text-only branch, "direct" final
-output), only the planner's next-step calls are trained, the others are frozen; Flow-GRPO with 32
-questions × 8 rollouts per step, 4 updates per step, clip 0.2 / 0.3, KL 0.001 to the base model,
-token-mean loss over the minibatch, temperature 0.7, at most 2048 planner tokens, at most 3 turns in
-training and 10 in evaluation, the official judge prompt, 3 evaluation trials.
+**As in the paper**: four modules on Qwen2.5-7B-Instruct with the official prompts (text-only branch,
+"direct" final output); only the planner's next-step calls are trained; Flow-GRPO with 32 questions × 8
+rollouts per step, 4 updates per step, clip 0.2 / 0.3, KL 0.001 to the base model, token-mean loss over
+the minibatch, temperature 0.7 in training, at most 2048 planner tokens, at most 3 turns in training and
+10 in evaluation, the official judge prompt.
 
-**Different**, and why:
+**Different from the paper or its official code**. The paper is arXiv 2510.05592; the code is
+[lupantech/AgentFlow](https://github.com/lupantech/AgentFlow), `train/config.yaml` and `test/bamboogle/run.sh`.
+Where the paper and its code disagree we follow the paper, except for Google Search, which the paper does
+not specify.
 
-- **LoRA** (r = 16, α = 32, all linear layers) instead of full fine-tuning, with learning rate 1e-4
-  instead of 1e-6 (LoRA needs a larger rate; 1e-5 barely moved the policy in our team's runs).
-- **Tools**: `Wikipedia_Search_Tool` is Search-R1's local E5 retriever over the 2018 Wikipedia dump
-  (top 3 passages) and `Base_Generator_Tool` is the base model. The official Bamboogle setup uses
-  Google Search through *Gemini 2.5 Flash* with Google grounding, and a Wikipedia tool that needs
-  OpenAI embeddings and gpt-4o-mini; those need paid API keys, and a local search engine keeps
-  training fast and repeatable. This is the main reason the absolute numbers are lower than the paper's.
-  `--google-search` adds `Google_Search_Tool` with DeepSeek's web search in place of Gemini 2.5 Flash,
-  which is retired; the main results train and evaluate with it. The official tool set's
-  `Python_Coder_Tool` is left out: Bamboogle's questions are fact lookups.
-- **Judge**: evaluation uses the official judge prompt with DeepSeek V4.1 Flash instead of GPT-4o;
-  exact match is reported next to it. The **training reward** is not an LLM judge but FlashRAG's
-  accuracy rule on whole words (a golden answer appears in the final answer): the DeepSeek API answers only about 40
-  requests a minute, which made judging 75 % of a training step, and the local Qwen2.5-7B-Instruct as
-  judge rejected 39 % of the answers DeepSeek accepts. On 500 Bamboogle answers the rule agrees with
-  DeepSeek 92 % of the time (Qwen as judge: 86 %, exact match: 80 %).
-- **Training data**: Search-R1's NQ + HotpotQA questions only (the paper mixes in DeepMath, which a
-  search benchmark does not need).
-- Every module samples at temperature 0.7 in training and evaluation, as the official training code
-  does (it passes one temperature to all modules); the paper only gives the planner's.
+| | paper | official code | ours | why |
+|---|---|---|---|---|
+| Training | full fine-tuning | learning rate 1e-6 | LoRA (r 16, α 32, all linear layers), learning rate 1e-4 | the assignment asks for LoRA; 1e-5 barely moved the LoRA policy in our team's runs |
+| Training data | Search-R1 + DeepMath | FlashRAG's NQ train + DeepMath-103K, about 180k questions | Search-R1's NQ + HotpotQA, no DeepMath | the benchmarks are search questions |
+| Training length | not stated | 5 epochs, about 28,000 steps of 32 questions | 30 steps, 960 questions | DeepSeek's search costs about ¥0.6 per step |
+| Frozen modules in training | Qwen2.5-7B-Instruct | gpt-4o-mini | Qwen2.5-7B-Instruct | as the paper; gpt-4o-mini is paid and leaves OpenAI's API on 14 January 2027 |
+| Frozen modules in evaluation | Qwen2.5-7B-Instruct | Qwen2.5-7B-Instruct through DashScope | the same weights through vLLM | |
+| Base_Generator_Tool | Qwen2.5-7B-Instruct | gpt-4o-mini | Qwen2.5-7B-Instruct | as the paper |
+| Python_Coder_Tool | Qwen2.5-7B-Instruct | Qwen2.5-Coder-7B through DashScope | left out | Bamboogle and LiveSearchBench are fact lookups |
+| Google_Search_Tool | "searches the web and returns a summarization of Top-K search results" | Gemini 2.5 Flash with Google Search grounding (thinking on by default), from the first commit; no other search API in the repository | DeepSeek V4.1 Flash with its server-side web search, thinking off | Gemini 2.5 Flash is closed to new API users and retired on 1 December 2026; DeepSeek's thinking search costs several times more |
+| Wikipedia_Search_Tool | | Wikipedia search, gpt-4o-mini picks pages, OpenAI text-embedding-3-small ranks chunks, gpt-4o-mini answers; the page step never runs (`model_string` is not set) | Search-R1's local E5 retriever over the 2018 dump; the official design with E5 and Qwen on live Wikipedia is `--search wikipedia` | live Wikipedia refuses training-scale traffic (HTTP 429); untrained, both score the same (43.7 / 44.3) |
+| Judge | an LLM judge | GPT-4o, official prompt | DeepSeek V4.1 Flash, official prompt, thinking off | GPT-4o left ChatGPT in February 2026, leaves the API on 14 January 2027 and needs a paid key |
+| Training reward | correctness of the final answer (0 / 1) | not checked | whole-word match of a golden answer (FlashRAG's accuracy rule) | the DeepSeek judge answers only about 40 requests a minute (below) |
+| Evaluation sampling | not stated | temperature 0, one run | temperature 0.7 in every module, mean ± standard deviation of 3 runs | to see the spread: the search tool is random by itself (4 identical requests to DeepSeek's web search gave 4 different answers, also at temperature 0) |
+| The web | Google in 2025 | | DeepSeek's search in November 2026 | the web changes; some of the benchmarks' answers are now online, and under 1 % of search results cite them |
+
+**Training reward**: the reward is a rule, not an LLM judge. The DeepSeek API answers only about 40
+requests a minute, which made judging 75 % of a training step. The local Qwen2.5-7B-Instruct as judge
+rejected 39 % of the answers DeepSeek accepts. On 500 Bamboogle answers the rule agrees with DeepSeek 92 %
+of the time (Qwen as judge: 86 %, exact match: 80 %).
 
 ## 3. How to run
 
@@ -255,6 +267,8 @@ sbatch -J eval cluster/eval.sbatch --mode direct --out $W/results/direct.json
 sbatch -J eval cluster/eval.sbatch --mode agentflow --out $W/results/agentflow.json
 sbatch -J flow_grpo cluster/train.sbatch --steps 200 --lr 1e-4   # a chain of 1-hour links
 sbatch -J flow_grpo_google cluster/train.sbatch --steps 30 --lr 1e-4 --google-search
+sbatch -J eval cluster/eval.sbatch --mode agentflow --google-search --planner-model AgentFlow/agentflow-planner-7b \
+  --vllm-mem 0.3 --out $W/results/agentflow_paper_planner.json   # two models: H200
 sbatch -J flow_grpo_greedy cluster/train.sbatch --steps 200 --lr 1e-4 --module-temperature 0
 sbatch -J eval cluster/eval.sbatch --mode agentflow --adapter $W/runs/flow_grpo/adapters/step_XXXX \
   --out $W/results/flow_grpo.json
