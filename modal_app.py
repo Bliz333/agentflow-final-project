@@ -75,7 +75,7 @@ def evaluate(args: str) -> bytes:
 
 
 @app.local_entrypoint()
-def main(args: str, out: str):
+def main(args: str, out: str, gpu: str = "H100"):
     Path(out).parent.mkdir(parents=True, exist_ok=True)
-    Path(out).write_bytes(evaluate.remote(args))
+    Path(out).write_bytes(evaluate.with_options(gpu=gpu).remote(args))
     print(f"wrote {out}")

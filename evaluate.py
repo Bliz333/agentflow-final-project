@@ -109,6 +109,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--mode", choices=["direct", "agentflow"], required=True)
     parser.add_argument("--adapter", help="Flow-GRPO LoRA adapter directory (none = untrained)")
+    parser.add_argument("--planner-model", help="a full model for the planner's next-step calls, e.g. the paper's "
+                                                "released AgentFlow/agentflow-planner-7b; the other modules stay on --model")
     parser.add_argument("--out", required=True)
     parser.add_argument("--search", choices=["local", "wikipedia"], default="local",
                         help="Wikipedia_Search_Tool: Search-R1's local retriever or the official tool on live Wikipedia")
@@ -128,8 +130,10 @@ def main():
     parser.add_argument("--api-model", default=MODEL_ID, help="the base model's name at --api-base")
     parser.add_argument("--api-key-env", default="QWEN_API_KEY", help="environment variable with the --api-base key")
     args = parser.parse_args()
-    if args.api_base and args.adapter:
-        parser.error("--api-base serves the base model only; evaluate an adapter with vLLM")
+    if args.api_base and (args.adapter or args.planner_model):
+        parser.error("--api-base serves the base model only; evaluate a trained planner with vLLM")
+    if args.adapter and args.planner_model:
+        parser.error("--adapter and --planner-model are two different trained planners")
     os.environ["OPENCODE_GO_API_KEY"]  # the judge's key: fail now, not after the GPU rollouts
 
     from transformers import AutoTokenizer
@@ -155,17 +159,19 @@ def main():
         llm = api or LLM(args.model, dtype="bfloat16", max_model_len=32768, gpu_memory_utilization=args.vllm_mem or 0.45,
                          seed=0, enable_lora=bool(args.adapter), max_lora_rank=16)
         lora = LoRARequest("adapter", 1, str(args.adapter)) if args.adapter else None
+        planner = LLM(args.planner_model, dtype="bfloat16", max_model_len=32768,
+                      gpu_memory_utilization=args.vllm_mem or 0.45, seed=0) if args.planner_model else None
         questions = [f"{x['question']} {agentflow.ANSWER_FORMAT}" for x in data]
         for trial in range(args.trials):
             episodes = agentflow.solve(llm, tokenizer, wikipedia, questions, args.max_steps, args.temperature, lora,
-                                       google=google)
+                                       google=google, planner_llm=planner)
             rows = score(data, [ep.output for ep in episodes])
             for row, ep in zip(rows, episodes):
                 row["memory"] = ep.memory
             trials.append(rows)
             print(f"trial {trial}: accuracy {sum(r['correct'] for r in rows) / len(rows):.3f}", flush=True)
     accuracy = [sum(r["correct"] for r in rows) / len(rows) for rows in trials]
-    summary = {"dataset": args.dataset, "mode": args.mode, "adapter": args.adapter, "n": len(data), "accuracy": statistics.mean(accuracy),
+    summary = {"dataset": args.dataset, "mode": args.mode, "adapter": args.adapter or args.planner_model, "n": len(data), "accuracy": statistics.mean(accuracy),
                "accuracy_std": statistics.pstdev(accuracy), "trials": accuracy,
                "em": statistics.mean(sum(r["em"] for r in rows) / len(rows) for rows in trials)}
     if args.mode == "agentflow":
