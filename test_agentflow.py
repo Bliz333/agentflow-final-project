@@ -181,6 +181,15 @@ def test_google_search_asks_deepseek_with_web_search_and_cites_like_the_official
     assert google_search.cite("no sources", None) == "no sources"
 
 
+def test_kgqagen_reads_the_answer_lists(tmp_path):
+    import pandas as pd
+    cache = tmp_path / "kgqagen.parquet"
+    pd.DataFrame({"question": [" Which film did Fei Mu direct? "], "answer": [["Confucius", "Spring in a Small Town"]]}
+                 ).to_parquet(cache)
+    assert evaluate.load_kgqagen("test", cache) == [{"question": "Which film did Fei Mu direct?",
+                                                     "golden_answers": ["Confucius", "Spring in a Small Town"]}]
+
+
 def test_livesearchbench_reads_one_answer_per_question(tmp_path):
     cache = tmp_path / "lsb.json"
     cache.write_text('[{"question": " In which country will ICLR 2026 be held? ", "answer": "Brazil", "level": 1}]')

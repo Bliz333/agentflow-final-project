@@ -1,5 +1,5 @@
-"""AgentFlow's Table 1 rows for Qwen2.5-7B-Instruct on Bamboogle (125 questions, Part 1) or on LiveSearchBench's
-2025 set (300 questions, Part 2: --dataset livesearchbench).
+"""AgentFlow's Table 1 rows for Qwen2.5-7B-Instruct on Bamboogle (125 questions, Part 1), on KGQAGen-10k's test
+split (Part 2: --dataset kgqagen) or on LiveSearchBench's 2025 set (300 questions: --dataset livesearchbench).
 
   direct     the base model answers alone, greedy, with Search-R1's Direct Inference prompt (the paper's
              Qwen-2.5-7B-Instruct row, 12.0, is Search-R1's number for this setting)
@@ -30,9 +30,24 @@ BAMBOOGLE_CSV = ("https://docs.google.com/spreadsheets/d/1jwcsA5kE4TObr9YHn9Gc-w
                  "/export?format=csv&gid=0")
 LIVESEARCHBENCH = ("https://raw.githubusercontent.com/hengzzzhou/LiveSearchbench/"
                    "e0286dc1361bbd91e663a7423f4b3f8959c14b15/bench/2025/level{}.json")
+KGQAGEN = ("https://huggingface.co/datasets/lianglz/KGQAGen-10k/resolve/145034b656c0009568697e370afe6a18f6c7c053/"
+           "data/{}-00000-of-00001.parquet")
 # FlashRAG's zero-shot prompt, which Search-R1 uses for Direct Inference.
 DIRECT_SYSTEM = ("Answer the question based on your own knowledge. "
                  "Only give me the answer and do not output any other words.")
+
+
+def load_kgqagen(split, cache):
+    """KGQAGen-10k (Zhang et al., 2025, arXiv 2505.23495, NeurIPS 2025 Datasets and Benchmarks): multi-hop questions
+    generated from Wikidata, split into train 8,629 / dev 1,079 / test 1,079; each answer is a list of entity names."""
+    import pandas as pd
+    cache = Path(cache)
+    if not cache.exists():
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        cache.write_bytes(urllib.request.urlopen(KGQAGEN.format(split)).read())
+    data = pd.read_parquet(cache)
+    return [{"question": q.strip(), "golden_answers": [a.strip() for a in g]}
+            for q, g in zip(data["question"], data["answer"])]
 
 
 def load_livesearchbench(cache):
@@ -117,9 +132,10 @@ def main():
     parser.add_argument("--google-search", action="store_true",
                         help="add the official Google_Search_Tool, answered by DeepSeek's web search (DEEPSEEK_API_KEY)")
     parser.add_argument("--retrieval", default="data/retrieval")
-    parser.add_argument("--dataset", choices=["bamboogle", "livesearchbench"], default="bamboogle")
+    parser.add_argument("--dataset", choices=["bamboogle", "kgqagen", "livesearchbench"], default="bamboogle")
     parser.add_argument("--bamboogle", default="data/bamboogle.csv")
     parser.add_argument("--livesearchbench", default="data/livesearchbench_2025.json")
+    parser.add_argument("--kgqagen", default="data/kgqagen_test.parquet")
     parser.add_argument("--trials", type=int, default=3)
     parser.add_argument("--max-steps", type=int, default=10)
     parser.add_argument("--temperature", type=float, default=0.7)
@@ -140,8 +156,8 @@ def main():
     from vllm import LLM, SamplingParams
     from vllm.lora.request import LoRARequest
 
-    data = (load_bamboogle(args.bamboogle) if args.dataset == "bamboogle" else
-            load_livesearchbench(args.livesearchbench))[:args.limit]
+    data = {"bamboogle": lambda: load_bamboogle(args.bamboogle), "kgqagen": lambda: load_kgqagen("test", args.kgqagen),
+            "livesearchbench": lambda: load_livesearchbench(args.livesearchbench)}[args.dataset]()[:args.limit]
     api = ApiLLM(args.api_base, args.api_model, args.api_key_env) if args.api_base else None
     tokenizer = Messages() if api else AutoTokenizer.from_pretrained(args.model)
     trials = []
