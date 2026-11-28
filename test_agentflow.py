@@ -145,6 +145,9 @@ def test_google_search_tool_is_offered_and_called_only_when_given():
     results = agentflow.run_tools(None, None, wiki, calls, google)
     assert results[0] == "web answer to founding year" and "text about Citibank" in results[1]
     assert google.queries == ["founding year"]
+    google.run = lambda queries: ["x" * (agentflow.RESULT_CHARS + 5) for _ in queries]
+    assert len(agentflow.run_tools(None, None, wiki, calls[:1], google)[0]) == agentflow.RESULT_CHARS + 3
+    google = FakeGoogle()
     llm, prompts = ScriptedLLM(), []
     generate = llm.generate
     llm.generate = lambda ps, *args, **kwargs: (prompts.extend(ps), generate(ps, *args, **kwargs))[1]
@@ -179,6 +182,15 @@ def test_google_search_asks_deepseek_with_web_search_and_cites_like_the_official
                          "tools": [{"type": "deepseek_web_search"}],
                          "extra_body": {"thinking": {"type": "disabled"}}}]
     assert google_search.cite("no sources", None) == "no sources"
+
+
+def test_kgqagen_reads_the_answer_lists(tmp_path):
+    import pandas as pd
+    cache = tmp_path / "kgqagen.parquet"
+    pd.DataFrame({"question": [" Which film did Fei Mu direct? "], "answer": [["Confucius", "Spring in a Small Town"]]}
+                 ).to_parquet(cache)
+    assert evaluate.load_kgqagen("test", cache) == [{"question": "Which film did Fei Mu direct?",
+                                                     "golden_answers": ["Confucius", "Spring in a Small Town"]}]
 
 
 def test_livesearchbench_reads_one_answer_per_question(tmp_path):

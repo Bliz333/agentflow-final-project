@@ -8,14 +8,14 @@ Canvas by its link).
 
 Replication of three Bamboogle rows of Table 1 of **AgentFlow** (Li et al., 2025,
 [arXiv 2510.05592](https://arxiv.org/abs/2510.05592)): *Qwen-2.5-7B-Instruct*, *AgentFlow* (untrained)
-and *AgentFlow w/ Flow-GRPO*, training the planner with **LoRA** instead of full fine-tuning. Part 2, the
-same rows on a 2025 dataset (LiveSearchBench), is the last section.
+and *AgentFlow w/ Flow-GRPO*, training the planner with **LoRA** instead of full fine-tuning. Part 2, on a
+2025 dataset with train and test splits (KGQAGen-10k), is the last section.
 
 | File | What it is |
 |---|---|
 | [`agentflow.py`](agentflow.py) | The AgentFlow loop (planner → executor → tool → verifier, then the solution generator), the official prompts, the tools and the judge |
 | [`train.py`](train.py) | Flow-GRPO: 32 questions × 8 rollouts per step, outcome reward broadcast to every planner turn, group-normalised advantage, clipped objective + KL, LoRA |
-| [`evaluate.py`](evaluate.py) | Bamboogle or LiveSearchBench (`--dataset`): `direct` (the base model alone) and `agentflow` (untrained or with an adapter, 3 trials) |
+| [`evaluate.py`](evaluate.py) | Bamboogle, KGQAGen-10k or LiveSearchBench (`--dataset`): `direct` (the base model alone) and `agentflow` (untrained or with an adapter, 3 trials) |
 | [`retriever.py`](retriever.py) | Search-R1's E5 search over the 2018 Wikipedia dump (from our Search-R1 replication) |
 | [`prep_index.py`](prep_index.py) | Builds `data/retrieval` from the files Search-R1 publishes (run once) |
 | [`wikipedia.py`](wikipedia.py) | The official Wikipedia_Search_Tool on live Wikipedia (`--search wikipedia`, section 1) |
@@ -275,7 +275,75 @@ sbatch -J eval cluster/eval.sbatch --mode agentflow --adapter $W/runs/flow_grpo/
 python diagnose.py --adapter $W/runs/flow_grpo/adapters/step_0030 --out $W/results/diagnose.json   # one GPU
 ```
 
-## Part 2 — LiveSearchBench 2025
+## Part 2 — KGQAGen-10k
+
+**Dataset**: KGQAGen-10k (Zhang et al., 2025, [arXiv 2505.23495](https://arxiv.org/abs/2505.23495), NeurIPS 2025
+Datasets and Benchmarks, CC BY 4.0), which the AgentFlow paper does not use. Its multi-hop questions are
+generated from Wikidata around Wikipedia's vital articles, and each answer is a short list of entity names
+(1.4 on average). We use its official splits ([lianglz/KGQAGen-10k](https://huggingface.co/datasets/lianglz/KGQAGen-10k)
+at commit `145034b`): train 8,629 and test 1,079 questions, with no question in both. Example: "Which film,
+directed and written by a male Chinese citizen from Shanghai who is part of the second generation of Chinese
+cinema, fits these criteria?" → Confucius.
+
+**What we ran**, with the same system as Part 1's main table (Google Search through DeepSeek, the local
+2018 Wikipedia retriever, the same judge):
+
+1. **Training**: Flow-GRPO on KGQAGen's train split from the base model, with Part 1's settings
+   (32 questions × 8 rollouts, 30 steps, LoRA, learning rate 1e-4); run `flow_grpo_kgqa`.
+2. **Evaluation** on the first 500 test questions, at temperature 0 with one run, as the official
+   evaluation script does.
+
+| KGQAGen-10k test, first 500 questions | accuracy | EM | turns |
+|---|---|---|---|
+| 1. Qwen-2.5-7B-Instruct (no tools) | 30.8 | 25.0 | |
+| 2. AgentFlow, untrained | 70.0 | 16.8 | 2.56 |
+| 3. AgentFlow w/ Flow-GRPO, Part 1 checkpoint (NQ + HotpotQA, step 30) | 72.6 | 25.8 | 2.80 |
+| 4. AgentFlow w/ Flow-GRPO, Part 2 checkpoint (KGQAGen train, step 30) | **73.4** | 17.4 | 1.58 |
+
+(`results/kgqa_direct.json`, `kgqa_agentflow.json`, `kgqa_part1_step_0030.json`, `kgqa_part2_step_0030.json`;
+the training metrics are `results/metrics/flow_grpo_kgqa.jsonl`.) Paired by question, with 95 % bootstrap
+intervals:
+
+| | accuracy | EM |
+|---|---|---|
+| row 3 − row 2 (Flow-GRPO trained on generic data) | +2.6 (−0.6 to +5.8) | +9.0 (+4.8 to +13.2) |
+| row 4 − row 2 (Flow-GRPO trained on this task) | +3.4 (+0.0 to +6.8) | +0.6 (−3.0 to +4.2) |
+| row 4 − row 3 | +0.8 (−2.2 to +3.8) | −8.4 (−12.2 to −4.6) |
+
+- **Generalization**: the checkpoint trained on generic search data (row 3) is as accurate as the one
+  trained on this task (row 4), 0.8 points apart. That is the assignment's sign that Flow-GRPO
+  generalizes to a new task.
+- **Training changed how the planner works.** Both trained planners gain 3 points over the untrained one;
+  only row 4's gain reaches the edge of significance. The task-trained planner (row 4) learned to rely on
+  Google Search: it makes 102 Wikipedia calls instead of 477 and stops after 1.6 turns instead of 2.6,
+  for slightly higher accuracy. The generic checkpoint (row 3) instead raises exact match by 9 points.
+- **Training reward**: flat at the level of the untrained system. It averaged 0.61 / 0.58 / 0.62 over
+  steps 1–10 / 11–20 / 21–30; a linear fit gives +0.0007 per step (95 % interval −0.0018 to +0.0032). As in
+  Part 1, 61 % of the groups of 8 rollouts had equal rewards and gave no training signal.
+- **Tool results are cut at 8,000 characters** (`agentflow.RESULT_CHARS`). Row 4's first evaluation
+  crashed because a few web search answers (up to 36,000 characters) overflowed the 32k-token context;
+  the official code cuts at 100,000 characters, for engines with 128k-token contexts. Rows 2 and 3 ran
+  before the cut; 5 and 4 of their roughly 1,300 tool results were longer.
+- **Cost**: about ¥86 of DeepSeek tokens in total, including one crashed evaluation. Training took about
+  ¥2 per step: KGQAGen's long multi-hop questions make DeepSeek search several times per call. GPUs were
+  Explorer H200s.
+
+```bash
+W=/scratch/$USER/info7375-w9
+K="--dataset kgqagen --limit 500 --trials 1 --temperature 0"
+sbatch -J flow_grpo_kgqa cluster/train.sbatch --dataset kgqagen --steps 30 --lr 1e-4 --google-search
+sbatch -J eval cluster/eval.sbatch $K --mode direct --out $W/results/kgqa_direct.json
+sbatch -J eval cluster/eval.sbatch $K --mode agentflow --google-search --out $W/results/kgqa_agentflow.json
+sbatch -J eval cluster/eval.sbatch $K --mode agentflow --google-search \
+  --adapter $W/runs/flow_grpo_google/adapters/step_0030 --out $W/results/kgqa_part1_step_0030.json
+sbatch -J eval cluster/eval.sbatch $K --mode agentflow --google-search \
+  --adapter $W/runs/flow_grpo_kgqa/adapters/step_0030 --out $W/results/kgqa_part2_step_0030.json
+```
+
+### Also: LiveSearchBench 2025 (evaluation only)
+
+We first ran Part 2 on this benchmark, before the assignment asked for a dataset with a train split.
+LiveSearchBench has only test sets, so it is kept here as an extra evaluation of Part 1's checkpoint.
 
 **Dataset**: LiveSearchBench (Zhou et al., 2025, [arXiv 2511.01409](https://arxiv.org/abs/2511.01409), November
 2025, CC BY 4.0), which the AgentFlow paper does not use. Its questions are generated from changes in
@@ -287,9 +355,8 @@ never answered correctly in 4 tries.
 
 **Same system as Part 1's main table**:
 - the same tools (Google Search through DeepSeek, Search-R1's local 2018 Wikipedia retriever);
-- the same judge, 3 trials, at most 10 turns;
-- the same Flow-GRPO adapter: step 30, trained on NQ + HotpotQA. The paper also trains once and evaluates
-  on every benchmark, and the dataset has no training split.
+- the same judge, 3 trials at temperature 0.7, at most 10 turns;
+- the same Flow-GRPO adapter: step 30, trained on NQ + HotpotQA.
 
 | LiveSearchBench 2025, 300 questions | accuracy | EM | level 1 / 2 / 3 |
 |---|---|---|---|

@@ -28,7 +28,7 @@ from peft import LoraConfig, PeftModel, get_peft_model
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import agentflow
-from evaluate import search_tool
+from evaluate import load_kgqagen, search_tool
 from google_search import DeepSeekSearch
 
 MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
@@ -84,6 +84,8 @@ def policy_loss(model, samples, n_tokens, args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out", required=True)
+    parser.add_argument("--dataset", choices=["nq_hotpotqa", "kgqagen"], default="nq_hotpotqa",
+                        help="training questions: Search-R1's NQ + HotpotQA (--data) or KGQAGen-10k's train split (Part 2)")
     parser.add_argument("--data", default="data/nq_hotpotqa_train/train.parquet")
     parser.add_argument("--search", choices=["local", "wikipedia"], default="local",
                         help="Wikipedia_Search_Tool: Search-R1's local retriever or the official tool on live Wikipedia")
@@ -136,7 +138,11 @@ def main():
     google = DeepSeekSearch() if args.google_search else None
     llm = LLM(args.model, dtype="bfloat16", max_model_len=32768, gpu_memory_utilization=args.vllm_mem,
               seed=args.seed, enable_lora=True, max_lora_rank=16, logprobs_mode="processed_logprobs")
-    questions = load_questions(args.data, args.seed)
+    if args.dataset == "nq_hotpotqa":
+        questions = load_questions(args.data, args.seed)
+    else:
+        questions = [(x["question"], x["golden_answers"]) for x in load_kgqagen("train", "data/kgqagen_train.parquet")]
+        random.Random(args.seed).shuffle(questions)
 
     for step in range(start, args.steps):
         t0 = time.time()
