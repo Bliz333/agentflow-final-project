@@ -145,6 +145,9 @@ def test_google_search_tool_is_offered_and_called_only_when_given():
     results = agentflow.run_tools(None, None, wiki, calls, google)
     assert results[0] == "web answer to founding year" and "text about Citibank" in results[1]
     assert google.queries == ["founding year"]
+    google.run = lambda queries: ["x" * (agentflow.RESULT_CHARS + 5) for _ in queries]
+    assert len(agentflow.run_tools(None, None, wiki, calls[:1], google)[0]) == agentflow.RESULT_CHARS + 3
+    google = FakeGoogle()
     llm, prompts = ScriptedLLM(), []
     generate = llm.generate
     llm.generate = lambda ps, *args, **kwargs: (prompts.extend(ps), generate(ps, *args, **kwargs))[1]

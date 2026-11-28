@@ -260,6 +260,10 @@ def parse_plan(text, tools):
                                     or key and t.lower().startswith(key)), None)
 
 
+RESULT_CHARS = 8000  # a longer tool result is cut, as the official code cuts at 100,000 for its 128k-token engines:
+                     # a few web search answers reach 36,000 characters and overflowed the 32k-token context
+
+
 def run_tools(llm, tokenizer, wikipedia, calls, google=None):
     """Results of (tool_name, command) calls; each tool's calls run as one batch."""
     tools = {"Base_Generator_Tool": lambda qs: [o.outputs[0].text for o in
@@ -275,7 +279,7 @@ def run_tools(llm, tokenizer, wikipedia, calls, google=None):
         if not idx:
             continue
         for i, out in zip(idx, run([queries[i].group(2) for i in idx])):
-            results[i] = out
+            results[i] = out[:RESULT_CHARS] + "..." if isinstance(out, str) and len(out) > RESULT_CHARS else out
     return results
 
 
